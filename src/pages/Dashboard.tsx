@@ -13,7 +13,9 @@ import {
   Zap,
   Shield,
   Heart,
-  Users
+  Users,
+  User,
+  List
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
