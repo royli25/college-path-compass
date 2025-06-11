@@ -118,7 +118,7 @@ const Schools = () => {
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-4 flex-1">
-                          <div className="text-3xl">{school.logo}</div>
+                          
                           <div className="flex-1 space-y-3">
                             <div className="flex items-start justify-between">
                               <div>
