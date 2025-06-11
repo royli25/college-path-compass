@@ -1,163 +1,161 @@
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import Navbar from "@/components/layout/Navbar";
-import ProgressRing from "@/components/ui/progress-ring";
+import { Button } from "@/components/ui/button";
+import RatingCard from "@/components/ui/rating-card";
+import ChatInterface from "@/components/ui/chat-interface";
 import { 
   BookOpen, 
   Calendar, 
   FileText, 
   Target, 
   TrendingUp, 
-  Clock,
-  CheckCircle,
-  AlertCircle
+  ExternalLink,
+  Zap,
+  Shield,
+  Heart,
+  Users
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
-  const upcomingDeadlines = [
-    { school: "Stanford University", type: "Early Action", date: "Nov 1, 2024", daysLeft: 15 },
-    { school: "MIT", type: "Regular Decision", date: "Jan 1, 2025", daysLeft: 45 },
-    { school: "UC Berkeley", type: "UC Application", date: "Nov 30, 2024", daysLeft: 44 },
+  const profileStrengths = [
+    {
+      title: "Overall Rating",
+      score: 75,
+      description: "Strong foundation with room for growth"
+    },
+    {
+      title: "Academic Strength",
+      score: 85,
+      description: "Excellent GPA and test scores"
+    },
+    {
+      title: "Extracurricular Strength",
+      score: 65,
+      description: "Good activities, need leadership"
+    },
+    {
+      title: "Personality Strength",
+      score: 70,
+      description: "Essays show potential"
+    }
   ];
 
-  const recentActivity = [
-    { action: "Completed Common App essay", time: "2 hours ago", type: "success" },
-    { action: "Added Harvard to school list", time: "1 day ago", type: "info" },
-    { action: "Updated activities section", time: "3 days ago", type: "success" },
-  ];
-
-  const quickStats = [
-    { label: "Schools Added", value: "12", icon: BookOpen, color: "text-blue-600" },
-    { label: "Essays Completed", value: "3/8", icon: FileText, color: "text-green-600" },
-    { label: "Profile Progress", value: "75%", icon: Target, color: "text-purple-600" },
-    { label: "Deadlines This Month", value: "4", icon: Calendar, color: "text-orange-600" },
+  const features = [
+    {
+      icon: User,
+      title: "Profile Builder",
+      description: "Build a comprehensive academic and personal profile",
+      href: "/profile",
+      color: "text-blue-400"
+    },
+    {
+      icon: BookOpen,
+      title: "School List",
+      description: "Research and organize your target schools",
+      href: "/schools", 
+      color: "text-green-400"
+    },
+    {
+      icon: List,
+      title: "Major Explorer",
+      description: "Discover programs that match your interests",
+      href: "/majors",
+      color: "text-purple-400"
+    },
+    {
+      icon: FileText,
+      title: "Essay Management",
+      description: "Track and organize your application essays",
+      href: "/essays",
+      color: "text-orange-400"
+    },
+    {
+      icon: Calendar,
+      title: "Deadline Tracker",
+      description: "Never miss an important application deadline",
+      href: "/deadlines",
+      color: "text-red-400"
+    },
+    {
+      icon: TrendingUp,
+      title: "Analytics",
+      description: "Track your application progress and insights",
+      href: "/dashboard",
+      color: "text-indigo-400"
+    }
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
-      <div className="container mx-auto px-4 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+    <div className="min-h-screen bg-background p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Welcome Header */}
+        <div className="space-y-2">
+          <h1 className="text-4xl font-medium text-foreground tracking-tight">
             Welcome back, Sarah! 👋
           </h1>
-          <p className="text-muted-foreground">
-            You're making great progress on your college applications. Keep it up!
+          <p className="text-lg text-muted-foreground">
+            You're making excellent progress on your college applications.
           </p>
         </div>
 
-        {/* Progress Overview */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                <span>Application Progress</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <p className="text-2xl font-bold text-foreground">68% Complete</p>
-                  <p className="text-muted-foreground">You're ahead of schedule!</p>
-                </div>
-                <ProgressRing progress={68} size={80} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Profile Strength & Features */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Profile Strength Overview */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-medium text-foreground">Profile Strength</h2>
+                <Button variant="outline" className="rounded-xl">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Full Breakdown
+                </Button>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {quickStats.map((stat, index) => {
-                  const Icon = stat.icon;
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {profileStrengths.map((strength, index) => (
+                  <RatingCard
+                    key={index}
+                    title={strength.title}
+                    score={strength.score}
+                    description={strength.description}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Features Overview */}
+            <div className="space-y-6">
+              <h2 className="text-2xl font-medium text-foreground">Platform Features</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {features.map((feature, index) => {
+                  const Icon = feature.icon;
                   return (
-                    <div key={index} className="text-center">
-                      <Icon className={`h-6 w-6 mx-auto mb-2 ${stat.color}`} />
-                      <p className="font-semibold text-foreground">{stat.value}</p>
-                      <p className="text-xs text-muted-foreground">{stat.label}</p>
-                    </div>
+                    <Card key={index} className="ultra-card smooth-hover group">
+                      <CardContent className="p-6">
+                        <Link to={feature.href} className="block space-y-3">
+                          <div className="flex items-center space-x-3">
+                            <div className={`p-2 rounded-xl bg-secondary/50 ${feature.color} group-hover:scale-110 transition-transform duration-200`}>
+                              <Icon className="h-5 w-5" />
+                            </div>
+                            <h3 className="font-medium text-foreground">{feature.title}</h3>
+                          </div>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {feature.description}
+                          </p>
+                        </Link>
+                      </CardContent>
+                    </Card>
                   );
                 })}
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Clock className="h-5 w-5 text-orange-500" />
-                <span>Upcoming Deadlines</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {upcomingDeadlines.map((deadline, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                  <div>
-                    <p className="font-medium text-foreground text-sm">{deadline.school}</p>
-                    <p className="text-xs text-muted-foreground">{deadline.type}</p>
-                    <p className="text-xs text-muted-foreground">{deadline.date}</p>
-                  </div>
-                  <Badge variant={deadline.daysLeft <= 20 ? "destructive" : "secondary"}>
-                    {deadline.daysLeft}d
-                  </Badge>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Button asChild className="h-20 flex-col space-y-2">
-            <Link to="/schools">
-              <BookOpen className="h-6 w-6" />
-              <span>Manage Schools</span>
-            </Link>
-          </Button>
-          <Button asChild variant="outline" className="h-20 flex-col space-y-2">
-            <Link to="/profile">
-              <Target className="h-6 w-6" />
-              <span>Update Profile</span>
-            </Link>
-          </Button>
-          <Button asChild variant="outline" className="h-20 flex-col space-y-2">
-            <Link to="/essays">
-              <FileText className="h-6 w-6" />
-              <span>Write Essays</span>
-            </Link>
-          </Button>
-          <Button asChild variant="outline" className="h-20 flex-col space-y-2">
-            <Link to="/deadlines">
-              <Calendar className="h-6 w-6" />
-              <span>View Calendar</span>
-            </Link>
-          </Button>
-        </div>
-
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-center space-x-3">
-                  {activity.type === "success" ? (
-                    <CheckCircle className="h-5 w-5 text-success" />
-                  ) : (
-                    <AlertCircle className="h-5 w-5 text-primary" />
-                  )}
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-foreground">{activity.action}</p>
-                    <p className="text-xs text-muted-foreground">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* Right Column - Chat Interface */}
+          <div className="lg:col-span-1">
+            <ChatInterface />
+          </div>
+        </div>
       </div>
     </div>
   );

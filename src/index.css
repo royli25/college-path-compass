@@ -1,32 +1,33 @@
 
+@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Modern, calming color palette for AppMate */
+/* Ultra-modern dark theme for AppMate */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 220 13% 9%;
+    --foreground: 0 0% 100%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 220 13% 11%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 220 13% 11%;
+    --popover-foreground: 0 0% 100%;
 
     --primary: 217 91% 60%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 220 13% 15%;
+    --secondary-foreground: 0 0% 60%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 13% 15%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 142 71% 45%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 220 13% 16%;
+    --accent-foreground: 0 0% 100%;
 
     --success: 142 71% 45%;
     --success-foreground: 0 0% 98%;
@@ -37,53 +38,19 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --border: 220 13% 20%;
+    --input: 220 13% 20%;
     --ring: 217 91% 60%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-background: 220 13% 8%;
+    --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 142 71% 45%;
-    --accent-foreground: 210 40% 98%;
-    --success: 142 71% 45%;
-    --success-foreground: 210 40% 98%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 217 91% 60%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-accent: 220 13% 12%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 13% 18%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
@@ -94,16 +61,38 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sf-pro;
     font-feature-settings: "rlig" 1, "calt" 1;
+    letter-spacing: -0.02em;
+    line-height: 1.4;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium tracking-tight;
   }
 }
 
-/* Custom gradients for AppMate */
+/* SF Pro Display font configuration */
+.font-sf-pro {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+/* Ultra-modern card styling */
+.ultra-card {
+  @apply bg-card/50 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl;
+}
+
+/* Smooth micro-interactions */
+.smooth-hover {
+  @apply transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-xl;
+}
+
+/* Custom gradients */
 .gradient-primary {
   background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
 }
 
-.gradient-card {
-  background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
+/* Chat interface styling */
+.chat-interface {
+  @apply bg-gradient-to-br from-card/30 to-card/10 backdrop-blur-xl border border-border/30 rounded-2xl;
 }
