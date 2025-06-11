@@ -10,7 +10,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Schools from "./pages/Schools";
 import Profile from "./pages/Profile";
-import Majors from "./pages/Majors";
+import Essays from "./pages/Essays";
 import NotFound from "./pages/NotFound";
 import { AppSidebar } from "./components/layout/AppSidebar";
 
@@ -35,9 +35,8 @@ const App = () => (
                       <Route path="/dashboard" element={<Dashboard />} />
                       <Route path="/schools" element={<Schools />} />
                       <Route path="/profile" element={<Profile />} />
-                      <Route path="/majors" element={<Majors />} />
+                      <Route path="/essays" element={<Essays />} />
                       <Route path="/deadlines" element={<Dashboard />} />
-                      <Route path="/essays" element={<Dashboard />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </main>

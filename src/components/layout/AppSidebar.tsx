@@ -5,8 +5,7 @@ import {
   User, 
   BookOpen, 
   Calendar, 
-  FileText, 
-  List,
+  FileText,
   BarChart3,
   Settings
 } from "lucide-react";
@@ -39,11 +38,6 @@ const navigationItems = [
     title: "Schools",
     icon: BookOpen,
     url: "/schools",
-  },
-  {
-    title: "Majors",
-    icon: List,
-    url: "/majors",
   },
   {
     title: "Essays",
