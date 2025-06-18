@@ -8,11 +8,12 @@ import ProfileCompletionAlert from "@/components/ProfileCompletionAlert";
 import { BookOpen, Calendar, FileText, Target, TrendingUp, ExternalLink, Zap, Shield, Heart, Users, User, List } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { useProfileStrength } from "@/hooks/useProfileData";
+import { useProfileStrength, useProfileData } from "@/hooks/useProfileData";
 
 const Dashboard = () => {
   const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
   const { strength, isComplete, isLoading } = useProfileStrength();
+  const { data: profile } = useProfileData();
 
   const profileStrengths = [
     {
@@ -99,7 +100,7 @@ const Dashboard = () => {
           {/* Welcome Header */}
           <div className="space-y-2">
             <h1 className="text-4xl font-medium text-foreground tracking-tight">
-              Welcome back, Sarah!
+              {`Welcome back${profile?.full_name ? ", " + profile.full_name : ""}!`}
             </h1>
             <p className="text-lg text-muted-foreground">
               You're making excellent progress on your college applications.
@@ -161,14 +162,11 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Right Column - Empty for floating AI assistant */}
-            <div></div>
+            {/* Right Column - AI Assistant fills this space */}
+            <div className="h-full w-full"><FloatingAIAssistant /></div>
           </div>
         </div>
       </div>
-
-      {/* Floating AI Assistant */}
-      <FloatingAIAssistant />
 
       {/* Full Breakdown Modal */}
       <FullBreakdownModal open={isBreakdownOpen} onOpenChange={setIsBreakdownOpen} />

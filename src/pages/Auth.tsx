@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,7 +73,7 @@ const Auth = () => {
               <GraduationCap className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Welcome to AppMate</h1>
+          <h1 className="text-2xl font-bold text-foreground">Welcome to MyBlueprint</h1>
           <p className="text-muted-foreground mt-2">Start organizing your college applications today</p>
         </div>
 

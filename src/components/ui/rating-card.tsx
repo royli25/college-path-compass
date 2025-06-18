@@ -1,6 +1,4 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import ProgressRing from "./progress-ring";
 import { cn } from "@/lib/utils";
 
 interface RatingCardProps {
@@ -44,7 +42,6 @@ const RatingCard = ({
               <p className="text-sm text-muted-foreground">{description}</p>
             )}
           </div>
-          <ProgressRing progress={percentage} size={70} strokeWidth={6} />
         </div>
       </CardContent>
     </Card>

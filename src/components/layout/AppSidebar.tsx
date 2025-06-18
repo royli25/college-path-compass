@@ -56,7 +56,7 @@ export function AppSidebar() {
             <GraduationCap className="h-6 w-6 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-xl font-medium text-foreground">AppMate</h1>
+            <h1 className="text-xl font-medium text-foreground">MyBlueprint</h1>
             <p className="text-sm text-muted-foreground">College Applications</p>
           </div>
         </div>
@@ -79,7 +79,7 @@ export function AppSidebar() {
                       className={cn(
                         "h-11 px-4 rounded-xl transition-all duration-200",
                         isActive 
-                          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25" 
+                          ? "bg-zinc-800 text-white border border-gray-600" 
                           : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                       )}
                     >

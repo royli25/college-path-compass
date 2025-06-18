@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, CheckCircle, Target, FileText, Calendar } from "lucide-react";
@@ -39,7 +38,7 @@ const Welcome = () => {
             </div>
           </div>
           <h1 className="text-5xl font-bold text-foreground mb-6">
-            Welcome to <span className="text-primary">AppMate</span>
+            Welcome to <span className="text-primary">MyBlueprint</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
             Your all-in-one companion for college applications. Streamline your journey 
@@ -79,7 +78,7 @@ const Welcome = () => {
         {/* Stats Section */}
         <div className="mt-20 text-center">
           <h2 className="text-3xl font-bold text-foreground mb-12">
-            Join thousands of students already using AppMate
+            Join thousands of students already using MyBlueprint
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div className="text-center">
