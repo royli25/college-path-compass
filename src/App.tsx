@@ -46,6 +46,7 @@ const App = () => (
                             </ProtectedRoute>
                           } />
                           <Route path="/profile" element={<Profile />} />
+                          <Route path="/profile/edit/:step" element={<ProfileEdit />} />
                           <Route path="/essays" element={<Essays />} />
                           <Route path="/deadlines" element={<Dashboard />} />
                           <Route path="*" element={<NotFound />} />
