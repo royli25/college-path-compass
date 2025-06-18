@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { useProfileData, useUpdateProfile } from "@/hooks/useProfileData";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useProfileData, useUpdateProfile, ApIbCourse } from "@/hooks/useProfileData";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, ArrowRight, Save, X, Plus } from "lucide-react";
 
@@ -24,11 +24,12 @@ const AcademicForm = ({ onNext, onBack }: AcademicFormProps) => {
     gpa_unweighted: "",
     gpa_weighted: "",
     sat_act_score: "",
-    ap_ib_courses: [] as string[],
+    ap_ib_courses: [] as ApIbCourse[],
     current_courses: [] as string[]
   });
 
   const [newApCourse, setNewApCourse] = useState("");
+  const [newApScore, setNewApScore] = useState<number | null>(null);
   const [newCurrentCourse, setNewCurrentCourse] = useState("");
 
   useEffect(() => {
@@ -47,9 +48,10 @@ const AcademicForm = ({ onNext, onBack }: AcademicFormProps) => {
     if (newApCourse.trim()) {
       setFormData({
         ...formData,
-        ap_ib_courses: [...formData.ap_ib_courses, newApCourse.trim()]
+        ap_ib_courses: [...formData.ap_ib_courses, { course: newApCourse.trim(), score: newApScore }]
       });
       setNewApCourse("");
+      setNewApScore(null);
     }
   };
 
@@ -57,6 +59,15 @@ const AcademicForm = ({ onNext, onBack }: AcademicFormProps) => {
     setFormData({
       ...formData,
       ap_ib_courses: formData.ap_ib_courses.filter((_, i) => i !== index)
+    });
+  };
+
+  const updateApScore = (index: number, score: number | null) => {
+    const updatedCourses = [...formData.ap_ib_courses];
+    updatedCourses[index] = { ...updatedCourses[index], score };
+    setFormData({
+      ...formData,
+      ap_ib_courses: updatedCourses
     });
   };
 
@@ -157,28 +168,55 @@ const AcademicForm = ({ onNext, onBack }: AcademicFormProps) => {
 
           <div className="space-y-3">
             <Label>AP/IB Courses</Label>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <Input
                 value={newApCourse}
                 onChange={(e) => setNewApCourse(e.target.value)}
                 placeholder="Add AP/IB course"
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addApCourse())}
               />
+              <Select value={newApScore?.toString() || ""} onValueChange={(value) => setNewApScore(value ? parseInt(value) : null)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Score (1-5)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
+                  <SelectItem value="3">3</SelectItem>
+                  <SelectItem value="4">4</SelectItem>
+                  <SelectItem value="5">5</SelectItem>
+                </SelectContent>
+              </Select>
               <Button type="button" onClick={addApCourse} size="sm">
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
             <div className="flex flex-wrap gap-2">
               {formData.ap_ib_courses.map((course, index) => (
-                <Badge key={index} variant="secondary" className="text-sm">
-                  {course}
+                <div key={index} className="flex items-center gap-2 bg-secondary rounded-lg px-3 py-2">
+                  <span className="text-sm font-medium">{course.course}</span>
+                  <Select 
+                    value={course.score?.toString() || ""} 
+                    onValueChange={(value) => updateApScore(index, value ? parseInt(value) : null)}
+                  >
+                    <SelectTrigger className="w-16 h-6">
+                      <SelectValue placeholder="-" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1</SelectItem>
+                      <SelectItem value="2">2</SelectItem>
+                      <SelectItem value="3">3</SelectItem>
+                      <SelectItem value="4">4</SelectItem>
+                      <SelectItem value="5">5</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <button
                     onClick={() => removeApCourse(index)}
-                    className="ml-2 hover:bg-destructive hover:text-destructive-foreground rounded-full p-0.5"
+                    className="hover:bg-destructive hover:text-destructive-foreground rounded-full p-0.5"
                   >
                     <X className="h-3 w-3" />
                   </button>
-                </Badge>
+                </div>
               ))}
             </div>
           </div>

@@ -1,7 +1,11 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+
+export interface ApIbCourse {
+  course: string;
+  score: number | null;
+}
 
 export interface ProfileData {
   id: string;
@@ -17,7 +21,7 @@ export interface ProfileData {
   gpa_unweighted: number | null;
   gpa_weighted: number | null;
   sat_act_score: string | null;
-  ap_ib_courses: string[] | null;
+  ap_ib_courses: ApIbCourse[] | null;
   current_courses: string[] | null;
   activities: any[] | null;
   leadership_positions: string[] | null;
