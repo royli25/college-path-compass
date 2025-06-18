@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +13,7 @@ import Dashboard from "./pages/Dashboard";
 import Schools from "./pages/Schools";
 import AdminSchools from "./pages/AdminSchools";
 import Profile from "./pages/Profile";
+import ProfileEdit from "./pages/ProfileEdit";
 import Essays from "./pages/Essays";
 import NotFound from "./pages/NotFound";
 import { AppSidebar } from "./components/layout/AppSidebar";

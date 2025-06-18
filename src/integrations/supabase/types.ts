@@ -94,25 +94,76 @@ export type Database = {
       }
       profiles: {
         Row: {
+          achievement_levels: string[] | null
+          activities: Json | null
+          ap_ib_courses: string[] | null
+          citizenship: string | null
+          class_rank: string | null
           created_at: string | null
+          current_courses: string[] | null
           email: string | null
+          first_generation: boolean | null
           full_name: string | null
+          gender: string | null
+          gpa_unweighted: number | null
+          gpa_weighted: number | null
+          high_school: string | null
+          honors_awards: Json | null
           id: string
+          income_bracket: string | null
+          leadership_positions: string[] | null
+          race_ethnicity: string | null
+          sat_act_score: string | null
           updated_at: string | null
+          years_involved: number | null
         }
         Insert: {
+          achievement_levels?: string[] | null
+          activities?: Json | null
+          ap_ib_courses?: string[] | null
+          citizenship?: string | null
+          class_rank?: string | null
           created_at?: string | null
+          current_courses?: string[] | null
           email?: string | null
+          first_generation?: boolean | null
           full_name?: string | null
+          gender?: string | null
+          gpa_unweighted?: number | null
+          gpa_weighted?: number | null
+          high_school?: string | null
+          honors_awards?: Json | null
           id: string
+          income_bracket?: string | null
+          leadership_positions?: string[] | null
+          race_ethnicity?: string | null
+          sat_act_score?: string | null
           updated_at?: string | null
+          years_involved?: number | null
         }
         Update: {
+          achievement_levels?: string[] | null
+          activities?: Json | null
+          ap_ib_courses?: string[] | null
+          citizenship?: string | null
+          class_rank?: string | null
           created_at?: string | null
+          current_courses?: string[] | null
           email?: string | null
+          first_generation?: boolean | null
           full_name?: string | null
+          gender?: string | null
+          gpa_unweighted?: number | null
+          gpa_weighted?: number | null
+          high_school?: string | null
+          honors_awards?: Json | null
           id?: string
+          income_bracket?: string | null
+          leadership_positions?: string[] | null
+          race_ethnicity?: string | null
+          sat_act_score?: string | null
           updated_at?: string | null
+          years_involved?: number | null
         }
         Relationships: []
       }
