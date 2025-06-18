@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from "react-router-dom";
 import { 
   GraduationCap, 
@@ -20,6 +21,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
+import NotificationsDropdown from "@/components/ui/notifications-dropdown";
 import { cn } from "@/lib/utils";
 
 const navigationItems = [
@@ -96,15 +98,18 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton className="h-11 px-4 rounded-xl text-sidebar-foreground hover:bg-sidebar-accent">
-              <Settings className="h-5 w-5" />
-              <span>Settings</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+      <SidebarFooter className="p-4 space-y-2">
+        <div className="flex items-center justify-between">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton className="h-11 px-4 rounded-xl text-sidebar-foreground hover:bg-sidebar-accent">
+                <Settings className="h-5 w-5" />
+                <span>Settings</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+          <NotificationsDropdown />
+        </div>
       </SidebarFooter>
     </Sidebar>
   );
