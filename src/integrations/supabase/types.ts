@@ -16,6 +16,7 @@ export type Database = {
           deadline: string | null
           id: string
           prompt_name: string
+          school_id: string | null
           school_name: string
           status: string | null
           updated_at: string | null
@@ -28,6 +29,7 @@ export type Database = {
           deadline?: string | null
           id?: string
           prompt_name: string
+          school_id?: string | null
           school_name: string
           status?: string | null
           updated_at?: string | null
@@ -40,13 +42,22 @@ export type Database = {
           deadline?: string | null
           id?: string
           prompt_name?: string
+          school_id?: string | null
           school_name?: string
           status?: string | null
           updated_at?: string | null
           user_id?: string | null
           word_limit?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "essays_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -75,6 +86,57 @@ export type Database = {
           is_read?: boolean | null
           message?: string
           title?: string
+          type?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      schools: {
+        Row: {
+          acceptance_rate: string | null
+          application_type: string | null
+          created_at: string | null
+          deadline: string | null
+          id: string
+          location: string | null
+          major: string | null
+          name: string
+          ranking: string | null
+          status: string | null
+          tuition: string | null
+          type: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          acceptance_rate?: string | null
+          application_type?: string | null
+          created_at?: string | null
+          deadline?: string | null
+          id?: string
+          location?: string | null
+          major?: string | null
+          name: string
+          ranking?: string | null
+          status?: string | null
+          tuition?: string | null
+          type?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          acceptance_rate?: string | null
+          application_type?: string | null
+          created_at?: string | null
+          deadline?: string | null
+          id?: string
+          location?: string | null
+          major?: string | null
+          name?: string
+          ranking?: string | null
+          status?: string | null
+          tuition?: string | null
           type?: string | null
           updated_at?: string | null
           user_id?: string | null

@@ -10,8 +10,17 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import FloatingAIAssistant from "@/components/ui/floating-ai-assistant";
 
+interface School {
+  id: string;
+  name: string;
+  location: string | null;
+  type: string | null;
+  deadline: string | null;
+}
+
 interface Essay {
   id: string;
+  school_id: string | null;
   school_name: string;
   prompt_name: string;
   word_limit: number | null;
@@ -26,6 +35,19 @@ const Essays = () => {
   const [newPrompt, setNewPrompt] = useState({ name: "", wordLimit: "" });
   const [addingPromptTo, setAddingPromptTo] = useState<string | null>(null);
   const queryClient = useQueryClient();
+
+  const { data: schools = [] } = useQuery({
+    queryKey: ['schools'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('schools')
+        .select('id, name, location, type, deadline')
+        .order('name', { ascending: true });
+      
+      if (error) throw error;
+      return data as School[];
+    },
+  });
 
   const { data: essays = [] } = useQuery({
     queryKey: ['essays'],
@@ -55,10 +77,16 @@ const Essays = () => {
   });
 
   const addPromptMutation = useMutation({
-    mutationFn: async ({ schoolName, promptName, wordLimit }: { schoolName: string; promptName: string; wordLimit?: number }) => {
+    mutationFn: async ({ schoolId, schoolName, promptName, wordLimit }: { 
+      schoolId: string; 
+      schoolName: string; 
+      promptName: string; 
+      wordLimit?: number 
+    }) => {
       const { error } = await supabase
         .from('essays')
         .insert({
+          school_id: schoolId,
           school_name: schoolName,
           prompt_name: promptName,
           word_limit: wordLimit,
@@ -74,14 +102,6 @@ const Essays = () => {
       setAddingPromptTo(null);
     },
   });
-
-  const schoolsData = essays.reduce((acc, essay) => {
-    if (!acc[essay.school_name]) {
-      acc[essay.school_name] = [];
-    }
-    acc[essay.school_name].push(essay);
-    return acc;
-  }, {} as Record<string, Essay[]>);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -105,14 +125,19 @@ const Essays = () => {
     return `${diffDays} days`;
   };
 
-  const handleAddPrompt = (schoolName: string) => {
+  const handleAddPrompt = (school: School) => {
     if (newPrompt.name.trim()) {
       addPromptMutation.mutate({
-        schoolName,
+        schoolId: school.id,
+        schoolName: school.name,
         promptName: newPrompt.name,
         wordLimit: newPrompt.wordLimit ? parseInt(newPrompt.wordLimit) : undefined
       });
     }
+  };
+
+  const getEssaysForSchool = (schoolId: string) => {
+    return essays.filter(essay => essay.school_id === schoolId);
   };
 
   if (editingEssay) {
@@ -177,107 +202,132 @@ const Essays = () => {
         </div>
 
         <div className="space-y-4">
-          {Object.entries(schoolsData).map(([schoolName, schoolEssays]) => (
-            <Card key={schoolName} className="ultra-card">
-              <CardHeader>
-                <div 
-                  className="flex items-center justify-between cursor-pointer"
-                  onClick={() => setExpandedSchool(expandedSchool === schoolName ? null : schoolName)}
-                >
-                  <div className="flex items-center space-x-4">
-                    {expandedSchool === schoolName ? (
-                      <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                    ) : (
-                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                    )}
-                    <CardTitle className="text-foreground">{schoolName}</CardTitle>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    {schoolEssays[0]?.deadline && (
-                      <Badge className="bg-red-600 text-white rounded-full">
-                        {new Date(schoolEssays[0].deadline).toLocaleDateString()} ({getDeadlineText(schoolEssays[0].deadline)})
-                      </Badge>
-                    )}
-                    <Badge className="bg-blue-600 text-white rounded-full">
-                      {schoolEssays.length} essay{schoolEssays.length !== 1 ? 's' : ''}
-                    </Badge>
-                  </div>
-                </div>
-              </CardHeader>
-
-              {expandedSchool === schoolName && (
-                <CardContent className="space-y-4">
-                  {schoolEssays.map((essay) => (
-                    <div key={essay.id} className="flex items-center justify-between p-4 bg-secondary rounded-xl">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-foreground">{essay.prompt_name}</h4>
-                        {essay.word_limit && (
-                          <p className="text-sm text-muted-foreground">Word limit: {essay.word_limit}</p>
+          {schools.map((school) => {
+            const schoolEssays = getEssaysForSchool(school.id);
+            return (
+              <Card key={school.id} className="ultra-card">
+                <CardHeader>
+                  <div 
+                    className="flex items-center justify-between cursor-pointer"
+                    onClick={() => setExpandedSchool(expandedSchool === school.id ? null : school.id)}
+                  >
+                    <div className="flex items-center space-x-4">
+                      {expandedSchool === school.id ? (
+                        <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                      ) : (
+                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                      )}
+                      <div>
+                        <CardTitle className="text-foreground">{school.name}</CardTitle>
+                        {school.location && (
+                          <p className="text-sm text-muted-foreground">{school.location}</p>
                         )}
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <Badge className={`${getStatusColor(essay.status)} rounded-full`}>
-                          {essay.status.charAt(0).toUpperCase() + essay.status.slice(1).replace('_', ' ')}
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      {school.deadline && (
+                        <Badge className="bg-red-600 text-white rounded-full">
+                          {new Date(school.deadline).toLocaleDateString()} ({getDeadlineText(school.deadline)})
                         </Badge>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setEditingEssay(essay)}
-                          className="rounded-full"
-                        >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
-                        </Button>
-                      </div>
+                      )}
+                      {school.type && (
+                        <Badge variant="outline" className="rounded-full capitalize">
+                          {school.type}
+                        </Badge>
+                      )}
+                      <Badge className="bg-blue-600 text-white rounded-full">
+                        {schoolEssays.length} essay{schoolEssays.length !== 1 ? 's' : ''}
+                      </Badge>
                     </div>
-                  ))}
+                  </div>
+                </CardHeader>
 
-                  {addingPromptTo === schoolName ? (
-                    <div className="p-4 bg-secondary rounded-xl space-y-4">
-                      <div>
-                        <Label htmlFor="prompt-name">Prompt Name</Label>
-                        <Input
-                          id="prompt-name"
-                          value={newPrompt.name}
-                          onChange={(e) => setNewPrompt({ ...newPrompt, name: e.target.value })}
-                          placeholder="Enter prompt name"
-                          className="mt-1"
-                        />
+                {expandedSchool === school.id && (
+                  <CardContent className="space-y-4">
+                    {schoolEssays.map((essay) => (
+                      <div key={essay.id} className="flex items-center justify-between p-4 bg-secondary rounded-xl">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-foreground">{essay.prompt_name}</h4>
+                          {essay.word_limit && (
+                            <p className="text-sm text-muted-foreground">Word limit: {essay.word_limit}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <Badge className={`${getStatusColor(essay.status)} rounded-full`}>
+                            {essay.status.charAt(0).toUpperCase() + essay.status.slice(1).replace('_', ' ')}
+                          </Badge>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setEditingEssay(essay)}
+                            className="rounded-full"
+                          >
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </Button>
+                        </div>
                       </div>
-                      <div>
-                        <Label htmlFor="word-limit">Word Limit (optional)</Label>
-                        <Input
-                          id="word-limit"
-                          type="number"
-                          value={newPrompt.wordLimit}
-                          onChange={(e) => setNewPrompt({ ...newPrompt, wordLimit: e.target.value })}
-                          placeholder="Enter word limit"
-                          className="mt-1"
-                        />
+                    ))}
+
+                    {addingPromptTo === school.id ? (
+                      <div className="p-4 bg-secondary rounded-xl space-y-4">
+                        <div>
+                          <Label htmlFor="prompt-name">Prompt Name</Label>
+                          <Input
+                            id="prompt-name"
+                            value={newPrompt.name}
+                            onChange={(e) => setNewPrompt({ ...newPrompt, name: e.target.value })}
+                            placeholder="Enter prompt name"
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="word-limit">Word Limit (optional)</Label>
+                          <Input
+                            id="word-limit"
+                            type="number"
+                            value={newPrompt.wordLimit}
+                            onChange={(e) => setNewPrompt({ ...newPrompt, wordLimit: e.target.value })}
+                            placeholder="Enter word limit"
+                            className="mt-1"
+                          />
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button onClick={() => handleAddPrompt(school)} className="rounded-full">
+                            Add Prompt
+                          </Button>
+                          <Button variant="outline" onClick={() => setAddingPromptTo(null)} className="rounded-full">
+                            Cancel
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex space-x-2">
-                        <Button onClick={() => handleAddPrompt(schoolName)} className="rounded-full">
-                          Add Prompt
-                        </Button>
-                        <Button variant="outline" onClick={() => setAddingPromptTo(null)} className="rounded-full">
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      onClick={() => setAddingPromptTo(schoolName)}
-                      className="w-full rounded-full"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Essay Prompt
-                    </Button>
-                  )}
-                </CardContent>
-              )}
+                    ) : (
+                      <Button
+                        variant="outline"
+                        onClick={() => setAddingPromptTo(school.id)}
+                        className="w-full rounded-full"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Essay Prompt
+                      </Button>
+                    )}
+                  </CardContent>
+                )}
+              </Card>
+            );
+          })}
+
+          {schools.length === 0 && (
+            <Card className="ultra-card text-center py-12">
+              <CardContent>
+                <div className="text-muted-foreground mb-4">
+                  <p className="text-lg">No schools found in your list.</p>
+                  <p className="text-sm">Add schools to your list to start managing essays.</p>
+                </div>
+                <Button className="rounded-xl">Go to School List</Button>
+              </CardContent>
             </Card>
-          ))}
+          )}
         </div>
       </div>
     </div>
