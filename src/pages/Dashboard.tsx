@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import RatingCard from "@/components/ui/rating-card";
@@ -59,13 +58,6 @@ const Dashboard = () => {
       description: "Track and organize your application essays",
       href: "/essays",
       color: "text-orange-400"
-    },
-    {
-      icon: Calendar,
-      title: "Deadline Tracker",
-      description: "Never miss an important application deadline",
-      href: "/deadlines",
-      color: "text-red-400"
     },
     {
       icon: TrendingUp,

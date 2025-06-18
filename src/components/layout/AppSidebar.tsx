@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { 
   GraduationCap, 
@@ -43,11 +42,6 @@ const navigationItems = [
     title: "Essays",
     icon: FileText,
     url: "/essays",
-  },
-  {
-    title: "Deadlines",
-    icon: Calendar,
-    url: "/deadlines",
   },
 ];
 

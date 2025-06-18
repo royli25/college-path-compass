@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { GraduationCap, User, BookOpen, Calendar, FileText, List } from "lucide-react";
@@ -11,7 +10,6 @@ const Navbar = () => {
     { href: "/dashboard", label: "Dashboard", icon: GraduationCap },
     { href: "/profile", label: "Profile", icon: User },
     { href: "/schools", label: "Schools", icon: BookOpen },
-    { href: "/deadlines", label: "Deadlines", icon: Calendar },
     { href: "/essays", label: "Essays", icon: FileText },
     { href: "/majors", label: "Majors", icon: List },
   ];
