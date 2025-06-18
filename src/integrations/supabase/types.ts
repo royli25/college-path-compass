@@ -96,7 +96,7 @@ export type Database = {
         Row: {
           achievement_levels: string[] | null
           activities: Json | null
-          ap_ib_courses: string[] | null
+          ap_ib_courses: Json | null
           citizenship: string | null
           class_rank: string | null
           created_at: string | null
@@ -120,7 +120,7 @@ export type Database = {
         Insert: {
           achievement_levels?: string[] | null
           activities?: Json | null
-          ap_ib_courses?: string[] | null
+          ap_ib_courses?: Json | null
           citizenship?: string | null
           class_rank?: string | null
           created_at?: string | null
@@ -144,7 +144,7 @@ export type Database = {
         Update: {
           achievement_levels?: string[] | null
           activities?: Json | null
-          ap_ib_courses?: string[] | null
+          ap_ib_courses?: Json | null
           citizenship?: string | null
           class_rank?: string | null
           created_at?: string | null
