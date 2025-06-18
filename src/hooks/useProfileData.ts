@@ -54,7 +54,14 @@ export const useProfileData = () => {
         .single();
 
       if (error) throw error;
-      return data as ProfileData;
+      
+      // Handle the type conversion for ap_ib_courses
+      const profileData = {
+        ...data,
+        ap_ib_courses: Array.isArray(data.ap_ib_courses) ? data.ap_ib_courses : null,
+      } as ProfileData;
+      
+      return profileData;
     },
     enabled: !!user,
   });
@@ -68,15 +75,28 @@ export const useUpdateProfile = () => {
     mutationFn: async (updates: Partial<ProfileData>) => {
       if (!user) throw new Error('User not authenticated');
 
+      // Convert the updates to match the database schema
+      const dbUpdates = {
+        ...updates,
+        updated_at: new Date().toISOString()
+      };
+
       const { data, error } = await supabase
         .from('profiles')
-        .update({ ...updates, updated_at: new Date().toISOString() })
+        .update(dbUpdates)
         .eq('id', user.id)
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      
+      // Handle the type conversion for the returned data
+      const profileData = {
+        ...data,
+        ap_ib_courses: Array.isArray(data.ap_ib_courses) ? data.ap_ib_courses : null,
+      } as ProfileData;
+      
+      return profileData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile-data'] });
