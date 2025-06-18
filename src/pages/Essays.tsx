@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +9,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import FloatingAIAssistant from "@/components/ui/floating-ai-assistant";
 
-interface School {
+interface UserSchool {
   id: string;
   name: string;
   location: string | null;
@@ -37,15 +36,15 @@ const Essays = () => {
   const queryClient = useQueryClient();
 
   const { data: schools = [] } = useQuery({
-    queryKey: ['schools'],
+    queryKey: ['user-schools'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('schools')
+        .from('user_school_lists')
         .select('id, name, location, type, deadline')
         .order('name', { ascending: true });
       
       if (error) throw error;
-      return data as School[];
+      return data as UserSchool[];
     },
   });
 
@@ -83,6 +82,9 @@ const Essays = () => {
       promptName: string; 
       wordLimit?: number 
     }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { error } = await supabase
         .from('essays')
         .insert({
@@ -91,7 +93,8 @@ const Essays = () => {
           prompt_name: promptName,
           word_limit: wordLimit,
           content: '',
-          status: 'drafting'
+          status: 'drafting',
+          user_id: user.id
         });
       
       if (error) throw error;
@@ -125,7 +128,7 @@ const Essays = () => {
     return `${diffDays} days`;
   };
 
-  const handleAddPrompt = (school: School) => {
+  const handleAddPrompt = (school: UserSchool) => {
     if (newPrompt.name.trim()) {
       addPromptMutation.mutate({
         schoolId: school.id,

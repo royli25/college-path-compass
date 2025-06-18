@@ -1,44 +1,36 @@
-
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, MapPin, Users, DollarSign, Star, BookOpen } from "lucide-react";
-import { useSchools } from "@/hooks/useSchools";
-import AddSchoolDialog from "@/components/AddSchoolDialog";
+import { useUserSchools } from "@/hooks/useSchools";
+import AddSchoolFromCatalogDialog from "@/components/AddSchoolFromCatalogDialog";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Schools = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
+  const { userRole } = useAuth();
   
-  const { data: schools = [], isLoading, error } = useSchools();
+  const { data: schools = [], isLoading, error } = useUserSchools();
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case "reach":
-        return "destructive";
-      case "target":
-        return "default";
-      case "safety":
-        return "secondary";
-      default:
-        return "outline";
+      case "reach": return "destructive";
+      case "target": return "default";
+      case "safety": return "secondary";
+      default: return "outline";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Submitted":
-        return "bg-green-500/20 text-green-400 border-green-500/30";
-      case "In Progress":
-        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
-      case "Not Started":
-        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
-      default:
-        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+      case "Submitted": return "bg-green-500/20 text-green-400 border-green-500/30";
+      case "In Progress": return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+      case "Not Started": return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+      default: return "bg-gray-500/20 text-gray-400 border-gray-500/30";
     }
   };
 
@@ -77,12 +69,17 @@ const Schools = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <h1 className="text-4xl font-medium text-foreground tracking-tight">School List</h1>
+            <h1 className="text-4xl font-medium text-foreground tracking-tight">
+              {userRole === 'admin' ? 'All School Lists' : 'My School List'}
+            </h1>
             <p className="text-lg text-muted-foreground">
-              Research and organize your target colleges
+              {userRole === 'admin' 
+                ? 'Manage all student school lists' 
+                : 'Research and organize your target colleges'
+              }
             </p>
           </div>
-          <AddSchoolDialog />
+          {userRole === 'student' && <AddSchoolFromCatalogDialog />}
         </div>
 
         {/* Search and Filters */}
@@ -249,7 +246,7 @@ const Schools = () => {
                   </>
                 )}
               </div>
-              <AddSchoolDialog />
+              {userRole === 'student' && <AddSchoolFromCatalogDialog />}
             </CardContent>
           </Card>
         )}
