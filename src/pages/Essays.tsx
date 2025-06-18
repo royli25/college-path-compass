@@ -146,7 +146,7 @@ const Essays = () => {
   if (editingEssay) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="flex">
+        <div className="flex gap-6">
           {/* Left side - Editor */}
           <div className="flex-1 p-8">
             <div className="mb-6">
@@ -184,9 +184,11 @@ const Essays = () => {
           </div>
 
           {/* Right side - AI Assistant */}
-          <FloatingAIAssistant 
-            placeholder={editingEssay.content ? "Use this editor to ask AI questions and refine your essay logic. Please do not copy and paste content directly from the editor into your final essay." : "Use this editor to ask AI questions and refine your essay logic. Please do not copy and paste content directly from the editor into your final essay."}
-          />
+          <div className="w-[350px] max-w-sm min-w-[300px] h-full pt-8 pr-8">
+            <FloatingAIAssistant 
+              placeholder={editingEssay.content ? "Use this editor to ask AI questions and refine your essay logic. Please do not copy and paste content directly from the editor into your final essay." : "Use this editor to ask AI questions and refine your essay logic. Please do not copy and paste content directly from the editor into your final essay."}
+            />
+          </div>
         </div>
       </div>
     );

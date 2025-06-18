@@ -1,4 +1,3 @@
-
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, ArrowRight } from "lucide-react";
@@ -12,11 +11,11 @@ const ProfileCompletionAlert = ({ completionPercentage }: ProfileCompletionAlert
   if (completionPercentage > 80) return null;
 
   return (
-    <Alert className="border-orange-200 bg-orange-50 text-orange-800 mb-6">
+    <Alert className="border-red-400 bg-red-100/20 text-white mb-6 backdrop-blur-md">
       <AlertCircle className="h-4 w-4" />
       <AlertTitle>Complete Your Profile</AlertTitle>
       <AlertDescription className="mt-2">
-        <div className="flex items-center justify-between">
+        <div className="flex items-end justify-between">
           <div>
             <p>Your profile is {completionPercentage}% complete. Complete your profile to get accurate strength ratings and better school recommendations.</p>
           </div>

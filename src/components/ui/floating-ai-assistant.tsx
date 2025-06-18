@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,8 +69,8 @@ const FloatingAIAssistant = ({
   };
 
   return (
-    <div className="fixed right-6 top-1/2 transform -translate-y-1/2 w-80 z-50">
-      <Card className="chat-interface h-96 flex flex-col shadow-2xl">
+    <div className="w-full h-full">
+      <Card className="chat-interface h-full flex flex-col shadow-2xl">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center space-x-2 text-foreground">
@@ -89,7 +88,7 @@ const FloatingAIAssistant = ({
           </div>
         </CardHeader>
         <CardContent className="flex-1 flex flex-col space-y-4">
-          <ScrollArea className="flex-1 h-64">
+          <ScrollArea className="flex-1">
             <div className="space-y-4 pr-4">
               {messages.map((message) => (
                 <div
