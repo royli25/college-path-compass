@@ -71,8 +71,8 @@ const FloatingAIAssistant = ({
 
   return (
     <div className="h-full w-full flex flex-col bg-card border-l border-border">
-      {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-border">
+      {/* Header - Fixed at top */}
+      <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-border bg-card">
         <div className="flex items-center space-x-2">
           <Bot className="h-5 w-5 text-primary" />
           <span className="text-lg font-medium text-foreground">AI Assistant</span>
@@ -81,13 +81,13 @@ const FloatingAIAssistant = ({
           variant="ghost"
           size="icon"
           onClick={handleClear}
-          className="h-8 w-8"
+          className="h-8 w-8 hover:bg-secondary"
         >
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
 
-      {/* Messages Area - Scrollable */}
+      {/* Messages Area - Scrollable middle section */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
           <div className="space-y-4 p-6">
@@ -98,7 +98,7 @@ const FloatingAIAssistant = ({
                   message.isBot ? "justify-start" : "justify-end flex-row-reverse space-x-reverse"
                 }`}
               >
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${
                   message.isBot ? "bg-primary" : "bg-secondary"
                 }`}>
                   {message.isBot ? (
@@ -107,12 +107,12 @@ const FloatingAIAssistant = ({
                     <User className="h-4 w-4 text-secondary-foreground" />
                   )}
                 </div>
-                <div className={`max-w-xs rounded-2xl px-4 py-2 ${
+                <div className={`max-w-[250px] rounded-2xl px-4 py-2 break-words ${
                   message.isBot 
                     ? "bg-secondary text-secondary-foreground" 
                     : "bg-primary text-primary-foreground"
                 }`}>
-                  <p className="text-sm">{message.content}</p>
+                  <p className="text-sm leading-relaxed">{message.content}</p>
                 </div>
               </div>
             ))}
@@ -120,20 +120,20 @@ const FloatingAIAssistant = ({
         </ScrollArea>
       </div>
 
-      {/* Fixed Input Area at Bottom */}
-      <div className="p-6 border-t border-border bg-card">
+      {/* Input Area - Fixed at bottom */}
+      <div className="flex-shrink-0 p-6 border-t border-border bg-card">
         <div className="flex space-x-2">
           <Input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Ask me anything..."
             onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-            className="flex-1 bg-background border-border rounded-xl"
+            className="flex-1 bg-background border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
           />
           <Button
             onClick={handleSendMessage}
             size="icon"
-            className="rounded-xl bg-primary hover:bg-primary/90"
+            className="rounded-xl bg-primary hover:bg-primary/90 flex-shrink-0"
           >
             <Send className="h-4 w-4" />
           </Button>

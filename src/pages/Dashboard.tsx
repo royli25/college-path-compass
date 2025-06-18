@@ -71,15 +71,23 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse space-y-8">
-            <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            <div className="grid grid-cols-2 gap-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded"></div>
-              ))}
+      <div className="min-h-screen bg-background">
+        {/* Fixed AI Assistant */}
+        <div className="fixed right-0 top-0 bottom-0 w-80 lg:w-96 xl:w-[400px] z-30 hidden md:block">
+          <FloatingAIAssistant />
+        </div>
+        
+        {/* Main Content with right padding to account for fixed AI assistant */}
+        <div className="pr-0 md:pr-80 lg:pr-96 xl:pr-[400px] p-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="animate-pulse space-y-8">
+              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              <div className="grid grid-cols-2 gap-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="h-32 bg-gray-200 rounded"></div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -88,10 +96,15 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Left Content Area */}
-      <div className="flex-1 max-w-4xl p-8">
-        <div className="space-y-8">
+    <div className="min-h-screen bg-background">
+      {/* Fixed AI Assistant - Hidden on mobile, responsive width on larger screens */}
+      <div className="fixed right-0 top-0 bottom-0 w-80 lg:w-96 xl:w-[400px] z-30 hidden md:block">
+        <FloatingAIAssistant />
+      </div>
+
+      {/* Main Content Area with responsive right padding to account for fixed AI assistant */}
+      <div className="pr-0 md:pr-80 lg:pr-96 xl:pr-[400px] p-8">
+        <div className="max-w-4xl mx-auto space-y-8">
           {/* Welcome Header */}
           <div className="space-y-2">
             <h1 className="text-4xl font-medium text-foreground tracking-tight">
@@ -152,12 +165,24 @@ const Dashboard = () => {
               })}
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Right AI Assistant Area - Full Height */}
-      <div className="w-96 h-screen">
-        <FloatingAIAssistant />
+          {/* Mobile AI Assistant - Show only on mobile as a card */}
+          <div className="block md:hidden">
+            <Card className="ultra-card">
+              <CardHeader>
+                <CardTitle className="text-lg font-medium">AI Assistant</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Get personalized advice for your college applications. Available on larger screens.
+                </p>
+                <Button variant="outline" className="w-full">
+                  View on Desktop
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
 
       {/* Full Breakdown Modal */}

@@ -55,10 +55,16 @@ export const useProfileData = () => {
 
       if (error) throw error;
       
-      // Handle the type conversion for ap_ib_courses
+      // Handle the type conversion for ap_ib_courses - convert string[] to ApIbCourse[]
       const profileData = {
         ...data,
-        ap_ib_courses: Array.isArray(data.ap_ib_courses) ? data.ap_ib_courses : null,
+        ap_ib_courses: Array.isArray(data.ap_ib_courses) 
+          ? data.ap_ib_courses.map((item: any) => 
+              typeof item === 'string' 
+                ? { course: item, score: null } 
+                : item
+            )
+          : null,
       } as ProfileData;
       
       return profileData;
@@ -75,9 +81,10 @@ export const useUpdateProfile = () => {
     mutationFn: async (updates: Partial<ProfileData>) => {
       if (!user) throw new Error('User not authenticated');
 
-      // Convert the updates to match the database schema
+      // Convert ApIbCourse[] back to the database format if needed
       const dbUpdates = {
         ...updates,
+        ap_ib_courses: updates.ap_ib_courses ? updates.ap_ib_courses : undefined,
         updated_at: new Date().toISOString()
       };
 
@@ -93,7 +100,13 @@ export const useUpdateProfile = () => {
       // Handle the type conversion for the returned data
       const profileData = {
         ...data,
-        ap_ib_courses: Array.isArray(data.ap_ib_courses) ? data.ap_ib_courses : null,
+        ap_ib_courses: Array.isArray(data.ap_ib_courses) 
+          ? data.ap_ib_courses.map((item: any) => 
+              typeof item === 'string' 
+                ? { course: item, score: null } 
+                : item
+            )
+          : null,
       } as ProfileData;
       
       return profileData;
