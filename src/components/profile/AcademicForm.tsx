@@ -24,6 +24,8 @@ const AcademicForm = ({ onNext, onBack }: AcademicFormProps) => {
     gpa_unweighted: "",
     gpa_weighted: "",
     sat_act_score: "",
+    high_school: "",
+    class_rank: "",
     ap_ib_courses: [] as ApIbCourse[],
     current_courses: [] as string[]
   });
@@ -38,6 +40,8 @@ const AcademicForm = ({ onNext, onBack }: AcademicFormProps) => {
         gpa_unweighted: profile.gpa_unweighted?.toString() || "",
         gpa_weighted: profile.gpa_weighted?.toString() || "",
         sat_act_score: profile.sat_act_score || "",
+        high_school: profile.high_school || "",
+        class_rank: profile.class_rank || "",
         ap_ib_courses: profile.ap_ib_courses || [],
         current_courses: profile.current_courses || []
       });
@@ -115,7 +119,8 @@ const AcademicForm = ({ onNext, onBack }: AcademicFormProps) => {
   };
 
   const isFormValid = formData.gpa_unweighted && formData.gpa_weighted && 
-                     formData.sat_act_score && formData.ap_ib_courses.length > 0 && 
+                     formData.sat_act_score && formData.high_school && formData.class_rank &&
+                     formData.ap_ib_courses.length > 0 && 
                      formData.current_courses.length > 0;
 
   if (isLoading) {
@@ -164,6 +169,26 @@ const AcademicForm = ({ onNext, onBack }: AcademicFormProps) => {
               onChange={(e) => setFormData({...formData, sat_act_score: e.target.value})}
               placeholder="e.g., SAT: 1450 or ACT: 32"
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>High School</Label>
+              <Input
+                value={formData.high_school}
+                onChange={(e) => setFormData({...formData, high_school: e.target.value})}
+                placeholder="Enter your high school name"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Class Rank</Label>
+              <Input
+                value={formData.class_rank}
+                onChange={(e) => setFormData({...formData, class_rank: e.target.value})}
+                placeholder="e.g., 15/300 or Top 10%"
+              />
+            </div>
           </div>
 
           <div className="space-y-3">

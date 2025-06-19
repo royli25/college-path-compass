@@ -16,6 +16,7 @@ import ProfileEdit from "./pages/ProfileEdit";
 import Essays from "./pages/Essays";
 import NotFound from "./pages/NotFound";
 import { AppSidebar } from "./components/layout/AppSidebar";
+import SchoolResearch from "@/pages/SchoolResearch";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
                         <Routes>
                           <Route path="/dashboard" element={<Dashboard />} />
                           <Route path="/schools" element={<Schools />} />
+                          <Route path="/schools/research/:schoolId" element={<SchoolResearch />} />
                           <Route path="/admin/schools" element={
                             <ProtectedRoute adminOnly>
                               <AdminSchools />

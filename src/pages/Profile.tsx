@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -151,27 +150,6 @@ const Profile = () => {
             );
           })}
         </div>
-
-        {/* Get Started CTA */}
-        <Card className="ultra-card text-center">
-          <CardContent className="p-8">
-            <div className="space-y-4">
-              <h3 className="text-2xl font-medium text-foreground">Ready to Get Started?</h3>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Building a complete profile typically takes 30-45 minutes. You can save your progress and return anytime.
-              </p>
-              <Link to={`/profile/edit/${currentStep}`}>
-                <Button 
-                  size="lg" 
-                  className="rounded-xl bg-primary hover:bg-primary/90"
-                >
-                  {strength.overall > 0 ? "Continue Building My Profile" : "Start Building My Profile"}
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

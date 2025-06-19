@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,9 +24,7 @@ const BackgroundForm = ({ onNext, onBack }: BackgroundFormProps) => {
     citizenship: "",
     race_ethnicity: "",
     first_generation: null as boolean | null,
-    income_bracket: "",
-    high_school: "",
-    class_rank: ""
+    income_bracket: ""
   });
 
   useEffect(() => {
@@ -37,9 +34,7 @@ const BackgroundForm = ({ onNext, onBack }: BackgroundFormProps) => {
         citizenship: profile.citizenship || "",
         race_ethnicity: profile.race_ethnicity || "",
         first_generation: profile.first_generation,
-        income_bracket: profile.income_bracket || "",
-        high_school: profile.high_school || "",
-        class_rank: profile.class_rank || ""
+        income_bracket: profile.income_bracket || ""
       });
     }
   }, [profile]);
@@ -66,8 +61,7 @@ const BackgroundForm = ({ onNext, onBack }: BackgroundFormProps) => {
   };
 
   const isFormValid = formData.gender && formData.citizenship && formData.race_ethnicity && 
-                     formData.first_generation !== null && formData.income_bracket && 
-                     formData.high_school && formData.class_rank;
+                     formData.first_generation !== null && formData.income_bracket;
 
   if (isLoading) {
     return <div className="flex justify-center p-8">Loading...</div>;
@@ -162,26 +156,6 @@ const BackgroundForm = ({ onNext, onBack }: BackgroundFormProps) => {
                 <SelectItem value="over-250k">Over $250,000</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>High School</Label>
-              <Input
-                value={formData.high_school}
-                onChange={(e) => setFormData({...formData, high_school: e.target.value})}
-                placeholder="Enter your high school name"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Class Rank</Label>
-              <Input
-                value={formData.class_rank}
-                onChange={(e) => setFormData({...formData, class_rank: e.target.value})}
-                placeholder="e.g., 15/300 or Top 10%"
-              />
-            </div>
           </div>
         </CardContent>
       </Card>

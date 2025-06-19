@@ -7,6 +7,7 @@ import { MapPin, Users, DollarSign, Star, BookOpen } from "lucide-react";
 import { useUserSchools } from "@/hooks/useSchools";
 import AddSchoolFromCatalogDialog from "@/components/AddSchoolFromCatalogDialog";
 import { useAuth } from "@/contexts/AuthContext";
+import { Link } from "react-router-dom";
 
 const Schools = () => {
   const { userRole } = useAuth();
@@ -158,9 +159,16 @@ const Schools = () => {
                         </div>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="rounded-xl ml-4">
-                      View Details
-                    </Button>
+                    <div className="flex flex-col space-y-2 ml-4">
+                      <Button variant="outline" size="sm" className="rounded-xl">
+                        View Details
+                      </Button>
+                      <Link to={`/schools/research/${school.id}`}>
+                        <Button variant="secondary" size="sm" className="rounded-xl bg-white text-black hover:bg-gray-100 w-full">
+                          Research Document
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
