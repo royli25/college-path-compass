@@ -1,144 +1,168 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Bot, User, Trash2 } from "lucide-react";
-import { useState } from "react";
+import React, { useState, useRef, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Send, Bot, User, Sparkles } from 'lucide-react';
+import { useRAGChat } from '@/hooks/useRAGChat';
 
-interface Message {
-  id: string;
-  content: string;
-  isBot: boolean;
-  timestamp: Date;
-}
+const FloatingAIAssistant = () => {
+  const [inputValue, setInputValue] = useState('');
+  const { messages, isLoading, sendMessage } = useRAGChat();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-interface FloatingAIAssistantProps {
-  placeholder?: string;
-  onClear?: () => void;
-}
-
-const FloatingAIAssistant = ({ 
-  placeholder = "I am your general college application AI assistant — feel free to ask me any questions about your application",
-  onClear
-}: FloatingAIAssistantProps) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      content: placeholder,
-      isBot: true,
-      timestamp: new Date(),
-    },
-  ]);
-  const [inputValue, setInputValue] = useState("");
-
-  const handleSendMessage = () => {
-    if (!inputValue.trim()) return;
-
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      content: inputValue,
-      isBot: false,
-      timestamp: new Date(),
-    };
-
-    setMessages([...messages, newMessage]);
-    setInputValue("");
-
-    // Simulate bot response
-    setTimeout(() => {
-      const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        content: "Thank you for your message! This AI assistant feature is coming soon and will provide personalized advice for your college applications.",
-        isBot: true,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, botResponse]);
-    }, 1000);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleClear = () => {
-    setMessages([
-      {
-        id: "1",
-        content: placeholder,
-        isBot: true,
-        timestamp: new Date(),
-      },
-    ]);
-    if (onClear) onClear();
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputValue.trim() || isLoading) return;
+
+    const message = inputValue.trim();
+    setInputValue('');
+    await sendMessage(message);
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
-    <div className="h-full w-full flex flex-col bg-card border-l border-border">
-      {/* Header - Fixed at top */}
-      <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-border bg-card">
-        <div className="flex items-center space-x-2">
-          <Bot className="h-5 w-5 text-primary" />
-          <span className="text-lg font-medium text-foreground">AI Assistant</span>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleClear}
-          className="h-8 w-8 hover:bg-secondary"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
+    <div className="h-full flex flex-col bg-background border-l border-border">
+      <CardHeader className="flex-shrink-0 p-4 border-b border-border">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <div className="p-2 rounded-full bg-primary/10">
+            <Sparkles className="h-4 w-4 text-primary" />
+          </div>
+          AI Assistant
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Get personalized college admissions advice
+        </p>
+      </CardHeader>
 
-      {/* Messages Area - Scrollable middle section */}
-      <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full">
-          <div className="space-y-4 p-6">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex items-start space-x-3 ${
-                  message.isBot ? "justify-start" : "justify-end flex-row-reverse space-x-reverse"
-                }`}
-              >
-                <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${
-                  message.isBot ? "bg-primary" : "bg-secondary"
-                }`}>
-                  {message.isBot ? (
-                    <Bot className="h-4 w-4 text-primary-foreground" />
-                  ) : (
-                    <User className="h-4 w-4 text-secondary-foreground" />
-                  )}
-                </div>
-                <div className={`max-w-[250px] rounded-2xl px-4 py-2 break-words ${
-                  message.isBot 
-                    ? "bg-secondary text-secondary-foreground" 
-                    : "bg-primary text-primary-foreground"
-                }`}>
-                  <p className="text-sm leading-relaxed">{message.content}</p>
+      <CardContent className="flex-1 flex flex-col p-0">
+        <ScrollArea className="flex-1 p-4">
+          <div className="space-y-4">
+            {messages.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <Bot className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">
+                  Ask me anything about college admissions!
+                </p>
+                <div className="mt-4 grid gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs h-auto p-2 text-left"
+                    onClick={() => sendMessage("What should I include in my college essays?")}
+                  >
+                    What should I include in my college essays?
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs h-auto p-2 text-left"
+                    onClick={() => sendMessage("How can I improve my application profile?")}
+                  >
+                    How can I improve my application profile?
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs h-auto p-2 text-left"
+                    onClick={() => sendMessage("What are good safety schools?")}
+                  >
+                    What are good safety schools?
+                  </Button>
                 </div>
               </div>
-            ))}
-          </div>
-        </ScrollArea>
-      </div>
+            )}
 
-      {/* Input Area - Fixed at bottom */}
-      <div className="flex-shrink-0 p-6 border-t border-border bg-card">
-        <div className="flex space-x-2">
-          <Input
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Ask me anything..."
-            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-            className="flex-1 bg-background border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
-          />
-          <Button
-            onClick={handleSendMessage}
-            size="icon"
-            className="rounded-xl bg-primary hover:bg-primary/90 flex-shrink-0"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex gap-3 ${
+                  message.role === 'user' ? 'justify-end' : 'justify-start'
+                }`}
+              >
+                {message.role === 'assistant' && (
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Bot className="h-4 w-4 text-primary" />
+                  </div>
+                )}
+                
+                <div
+                  className={`max-w-[80%] rounded-lg p-3 ${
+                    message.role === 'user'
+                      ? 'bg-primary text-primary-foreground ml-auto'
+                      : 'bg-muted'
+                  }`}
+                >
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <p
+                    className={`text-xs mt-1 ${
+                      message.role === 'user'
+                        ? 'text-primary-foreground/70'
+                        : 'text-muted-foreground'
+                    }`}
+                  >
+                    {formatTime(message.timestamp)}
+                  </p>
+                </div>
+
+                {message.role === 'user' && (
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
+                    <User className="h-4 w-4" />
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {isLoading && (
+              <div className="flex gap-3 justify-start">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Bot className="h-4 w-4 text-primary animate-pulse" />
+                </div>
+                <div className="bg-muted rounded-lg p-3">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <div ref={messagesEndRef} />
+        </ScrollArea>
+
+        <div className="flex-shrink-0 p-4 border-t border-border">
+          <form onSubmit={handleSubmit} className="flex gap-2">
+            <Input
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Ask about college admissions..."
+              disabled={isLoading}
+              className="flex-1"
+            />
+            <Button
+              type="submit"
+              disabled={!inputValue.trim() || isLoading}
+              size="icon"
+              className="flex-shrink-0"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </form>
         </div>
-      </div>
+      </CardContent>
     </div>
   );
 };
