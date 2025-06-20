@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
+import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import Welcome from "./pages/Welcome";
 import Auth from "./pages/Auth";
@@ -27,45 +28,47 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/welcome" element={<Welcome />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route
-                path="/*"
-                element={
-                  <ProtectedRoute>
-                    <SidebarProvider>
-                      <div className="flex min-h-screen w-full">
-                        <AppSidebar />
-                        <main className="flex-1 bg-background">
-                          <Routes>
-                            <Route path="dashboard" element={<Dashboard />} />
-                            <Route path="profile" element={<Profile />} />
-                            <Route path="profile/edit" element={<ProfileEdit />} />
-                            <Route path="schools" element={<Schools />} />
-                            <Route path="schools/:schoolId/research" element={<SchoolResearch />} />
-                            <Route path="essays" element={<Essays />} />
-                            <Route path="admin/schools" element={<AdminSchools />} />
-                            <Route path="resources/admitted-profiles" element={<AdmittedProfiles />} />
-                            <Route path="resources/admitted-profiles/:profileId" element={<AdmittedProfileDetail />} />
-                            <Route path="settings" element={<Settings />} />
-                            <Route path="*" element={<NotFound />} />
-                          </Routes>
-                        </main>
-                      </div>
-                    </SidebarProvider>
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/welcome" element={<Welcome />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route
+                  path="/*"
+                  element={
+                    <ProtectedRoute>
+                      <SidebarProvider>
+                        <div className="flex min-h-screen w-full">
+                          <AppSidebar />
+                          <main className="flex-1 bg-background">
+                            <Routes>
+                              <Route path="dashboard" element={<Dashboard />} />
+                              <Route path="profile" element={<Profile />} />
+                              <Route path="profile/edit" element={<ProfileEdit />} />
+                              <Route path="schools" element={<Schools />} />
+                              <Route path="schools/:schoolId/research" element={<SchoolResearch />} />
+                              <Route path="essays" element={<Essays />} />
+                              <Route path="admin/schools" element={<AdminSchools />} />
+                              <Route path="resources/admitted-profiles" element={<AdmittedProfiles />} />
+                              <Route path="resources/admitted-profiles/:profileId" element={<AdmittedProfileDetail />} />
+                              <Route path="settings" element={<Settings />} />
+                              <Route path="*" element={<NotFound />} />
+                            </Routes>
+                          </main>
+                        </div>
+                      </SidebarProvider>
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
