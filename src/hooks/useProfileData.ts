@@ -81,10 +81,14 @@ export const useUpdateProfile = () => {
     mutationFn: async (updates: Partial<ProfileData>) => {
       if (!user) throw new Error('User not authenticated');
 
-      // Convert ApIbCourse[] back to the database format if needed
+      // Convert ApIbCourse[] to string[] for database storage
       const dbUpdates = {
         ...updates,
-        ap_ib_courses: updates.ap_ib_courses ? updates.ap_ib_courses : undefined,
+        ap_ib_courses: updates.ap_ib_courses 
+          ? updates.ap_ib_courses.map(course => 
+              typeof course === 'string' ? course : course.course
+            )
+          : undefined,
         updated_at: new Date().toISOString()
       };
 

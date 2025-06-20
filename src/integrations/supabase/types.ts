@@ -9,6 +9,84 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admitted_profiles: {
+        Row: {
+          act_score: number | null
+          activities: Json | null
+          advice: string | null
+          ap_ib_courses: Json | null
+          background_story: string | null
+          colleges_admitted: Json | null
+          colleges_rejected: Json | null
+          colleges_waitlisted: Json | null
+          created_at: string
+          demographics: Json | null
+          essay_excerpts: Json | null
+          gpa_unweighted: number | null
+          gpa_weighted: number | null
+          graduation_year: number
+          high_school: string
+          honors_awards: Json | null
+          id: string
+          intended_major: string | null
+          leadership_positions: string[] | null
+          name: string
+          profile_photo: string | null
+          sat_score: number | null
+          updated_at: string
+        }
+        Insert: {
+          act_score?: number | null
+          activities?: Json | null
+          advice?: string | null
+          ap_ib_courses?: Json | null
+          background_story?: string | null
+          colleges_admitted?: Json | null
+          colleges_rejected?: Json | null
+          colleges_waitlisted?: Json | null
+          created_at?: string
+          demographics?: Json | null
+          essay_excerpts?: Json | null
+          gpa_unweighted?: number | null
+          gpa_weighted?: number | null
+          graduation_year: number
+          high_school: string
+          honors_awards?: Json | null
+          id?: string
+          intended_major?: string | null
+          leadership_positions?: string[] | null
+          name: string
+          profile_photo?: string | null
+          sat_score?: number | null
+          updated_at?: string
+        }
+        Update: {
+          act_score?: number | null
+          activities?: Json | null
+          advice?: string | null
+          ap_ib_courses?: Json | null
+          background_story?: string | null
+          colleges_admitted?: Json | null
+          colleges_rejected?: Json | null
+          colleges_waitlisted?: Json | null
+          created_at?: string
+          demographics?: Json | null
+          essay_excerpts?: Json | null
+          gpa_unweighted?: number | null
+          gpa_weighted?: number | null
+          graduation_year?: number
+          high_school?: string
+          honors_awards?: Json | null
+          id?: string
+          intended_major?: string | null
+          leadership_positions?: string[] | null
+          name?: string
+          profile_photo?: string | null
+          sat_score?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       document_chunks: {
         Row: {
           chunk_index: number
@@ -237,6 +315,41 @@ export type Database = {
           years_involved?: number | null
         }
         Relationships: []
+      }
+      school_research: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          school_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          school_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          school_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_research_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "user_school_lists"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       schools_catalog: {
         Row: {

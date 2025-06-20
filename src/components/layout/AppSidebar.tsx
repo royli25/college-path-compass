@@ -1,116 +1,136 @@
 
-import { Link, useLocation } from "react-router-dom";
-import { 
-  GraduationCap, 
-  User, 
-  BookOpen, 
-  Calendar, 
+import {
+  Calendar,
   FileText,
-  BarChart3,
-  Settings
-} from "lucide-react";
+  GraduationCap,
+  Home,
+  School,
+  Settings,
+  User,
+  Users,
+} from "lucide-react"
+
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarHeader,
-  SidebarFooter,
-} from "@/components/ui/sidebar";
-import NotificationsDropdown from "@/components/ui/notifications-dropdown";
-import { cn } from "@/lib/utils";
+} from "@/components/ui/sidebar"
+import { Link, useLocation } from "react-router-dom"
 
-const navigationItems = [
+// My Application menu items.
+const myApplicationItems = [
   {
     title: "Dashboard",
-    icon: BarChart3,
     url: "/dashboard",
+    icon: Home,
   },
   {
     title: "Profile",
-    icon: User,
     url: "/profile",
+    icon: User,
   },
   {
     title: "Schools",
-    icon: BookOpen,
     url: "/schools",
+    icon: School,
   },
   {
     title: "Essays",
-    icon: FileText,
     url: "/essays",
+    icon: FileText,
   },
-];
+]
+
+// Resources menu items.
+const resourcesItems = [
+  {
+    title: "Admitted Profiles",
+    url: "/resources/admitted-profiles",
+    icon: Users,
+  },
+]
 
 export function AppSidebar() {
-  const location = useLocation();
+  const location = useLocation()
+
+  const isActive = (url: string) => {
+    if (url === "/dashboard") {
+      return location.pathname === "/dashboard"
+    }
+    return location.pathname.startsWith(url)
+  }
 
   return (
-    <Sidebar className="border-r border-sidebar-border bg-sidebar">
-      <SidebarHeader className="p-6">
-        <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-            <GraduationCap className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="text-xl font-medium text-foreground">MyBlueprint</h1>
-            <p className="text-sm text-muted-foreground">College Applications</p>
-          </div>
-        </div>
-      </SidebarHeader>
-
-      <SidebarContent className="px-4">
+    <Sidebar>
+      <SidebarContent>
+        {/* My Application Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground uppercase tracking-wider text-xs font-medium mb-2">
-            Navigation
-          </SidebarGroupLabel>
+          <SidebarGroupLabel>My Application</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
-              {navigationItems.map((item) => {
-                const isActive = location.pathname === item.url;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      asChild 
-                      isActive={isActive}
-                      className={cn(
-                        "h-11 px-4 rounded-xl transition-all duration-200",
-                        isActive 
-                          ? "bg-zinc-800 text-white border border-gray-600" 
-                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                      )}
-                    >
-                      <Link to={item.url} className="flex items-center space-x-3">
-                        <item.icon className="h-5 w-5" />
-                        <span className="font-medium">{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+            <SidebarMenu>
+              {myApplicationItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={isActive(item.url)}
+                    className="data-[active=true]:bg-primary data-[active=true]:text-primary-foreground"
+                  >
+                    <Link to={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Resources Section */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Resources</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {resourcesItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={isActive(item.url)}
+                    className="data-[active=true]:bg-primary data-[active=true]:text-primary-foreground"
+                  >
+                    <Link to={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
-      <SidebarFooter className="p-4 space-y-2">
-        <div className="flex items-center justify-between">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton className="h-11 px-4 rounded-xl text-sidebar-foreground hover:bg-sidebar-accent">
-                <Settings className="h-5 w-5" />
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              asChild 
+              isActive={isActive("/settings")}
+              className="data-[active=true]:bg-primary data-[active=true]:text-primary-foreground"
+            >
+              <Link to="/settings">
+                <Settings />
                 <span>Settings</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-          <NotificationsDropdown />
-        </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-  );
+  )
 }
