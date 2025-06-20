@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import Navbar from "@/components/layout/Navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import Index from "./pages/Index";
@@ -43,24 +42,21 @@ function App() {
                     <SidebarProvider>
                       <div className="flex min-h-screen w-full">
                         <AppSidebar />
-                        <div className="flex-1 flex flex-col">
-                          <Navbar />
-                          <main className="flex-1">
-                            <Routes>
-                              <Route path="dashboard" element={<Dashboard />} />
-                              <Route path="profile" element={<Profile />} />
-                              <Route path="profile/edit" element={<ProfileEdit />} />
-                              <Route path="schools" element={<Schools />} />
-                              <Route path="schools/:schoolId/research" element={<SchoolResearch />} />
-                              <Route path="essays" element={<Essays />} />
-                              <Route path="admin/schools" element={<AdminSchools />} />
-                              <Route path="resources/admitted-profiles" element={<AdmittedProfiles />} />
-                              <Route path="resources/admitted-profiles/:profileId" element={<AdmittedProfileDetail />} />
-                              <Route path="settings" element={<Settings />} />
-                              <Route path="*" element={<NotFound />} />
-                            </Routes>
-                          </main>
-                        </div>
+                        <main className="flex-1 bg-background">
+                          <Routes>
+                            <Route path="dashboard" element={<Dashboard />} />
+                            <Route path="profile" element={<Profile />} />
+                            <Route path="profile/edit" element={<ProfileEdit />} />
+                            <Route path="schools" element={<Schools />} />
+                            <Route path="schools/:schoolId/research" element={<SchoolResearch />} />
+                            <Route path="essays" element={<Essays />} />
+                            <Route path="admin/schools" element={<AdminSchools />} />
+                            <Route path="resources/admitted-profiles" element={<AdmittedProfiles />} />
+                            <Route path="resources/admitted-profiles/:profileId" element={<AdmittedProfileDetail />} />
+                            <Route path="settings" element={<Settings />} />
+                            <Route path="*" element={<NotFound />} />
+                          </Routes>
+                        </main>
                       </div>
                     </SidebarProvider>
                   </ProtectedRoute>
