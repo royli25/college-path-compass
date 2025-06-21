@@ -11,7 +11,7 @@ const ProfileCompletionAlert = ({ completionPercentage }: ProfileCompletionAlert
   if (completionPercentage > 80) return null;
 
   return (
-    <Alert className="border-red-400 bg-red-100/20 text-white mb-6 backdrop-blur-md">
+    <Alert className="border-red-400 bg-red-100 text-red-900 mb-6 backdrop-blur-md">
       <AlertCircle className="h-4 w-4" />
       <AlertTitle>Complete Your Profile</AlertTitle>
       <AlertDescription className="mt-2">

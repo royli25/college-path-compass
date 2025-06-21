@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -20,6 +19,7 @@ import Essays from "./pages/Essays";
 import AdminSchools from "./pages/AdminSchools";
 import AdmittedProfiles from "./pages/AdmittedProfiles";
 import AdmittedProfileDetail from "./pages/AdmittedProfileDetail";
+import AdmittedStudentsBlog from "./pages/AdmittedStudentsBlog";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -42,9 +42,9 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <SidebarProvider>
-                        <div className="flex min-h-screen w-full">
+                        <div className="flex h-screen w-full overflow-hidden">
                           <AppSidebar />
-                          <main className="flex-1 bg-background">
+                          <main className="flex-1 bg-background overflow-y-auto">
                             <Routes>
                               <Route path="dashboard" element={<Dashboard />} />
                               <Route path="profile" element={<Profile />} />
@@ -55,6 +55,7 @@ function App() {
                               <Route path="admin/schools" element={<AdminSchools />} />
                               <Route path="resources/admitted-profiles" element={<AdmittedProfiles />} />
                               <Route path="resources/admitted-profiles/:profileId" element={<AdmittedProfileDetail />} />
+                              <Route path="resources/admitted-students-blog" element={<AdmittedStudentsBlog />} />
                               <Route path="settings" element={<Settings />} />
                               <Route path="*" element={<NotFound />} />
                             </Routes>
