@@ -1,10 +1,12 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GraduationCap, Mail, Lock, User, ArrowLeft, AlertCircle } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { GraduationCap, Mail, Lock, User, ArrowLeft, AlertCircle, Users } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -20,7 +22,8 @@ const Auth = () => {
   const [signUpData, setSignUpData] = useState({ 
     fullName: "", 
     email: "", 
-    password: "" 
+    password: "",
+    role: "student" as "student" | "advisor"
   });
 
   // Redirect if already authenticated
@@ -48,13 +51,13 @@ const Auth = () => {
     setSuccess(null);
     setIsSigningUp(true);
     
-    const { error } = await signUp(signUpData.email, signUpData.password, signUpData.fullName);
+    const { error } = await signUp(signUpData.email, signUpData.password, signUpData.fullName, signUpData.role);
     
     if (error) {
       setError(error.message || 'Failed to create account');
     } else {
       setSuccess('Account created successfully! Please check your email to verify your account.');
-      setSignUpData({ fullName: "", email: "", password: "" });
+      setSignUpData({ fullName: "", email: "", password: "", role: "student" });
     }
     
     setIsSigningUp(false);
@@ -186,6 +189,43 @@ const Auth = () => {
                         required
                       />
                     </div>
+                  </div>
+                  <div className="space-y-3">
+                    <Label htmlFor="role">Account Type</Label>
+                    <RadioGroup
+                      value={signUpData.role}
+                      onValueChange={(value) => setSignUpData({ ...signUpData, role: value as "student" | "advisor" })}
+                      className="grid grid-cols-1 gap-3"
+                    >
+                      <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors">
+                        <RadioGroupItem value="student" id="student" />
+                        <div className="flex items-center space-x-2 flex-1">
+                          <GraduationCap className="h-5 w-5 text-primary" />
+                          <div>
+                            <Label htmlFor="student" className="font-medium cursor-pointer">
+                              Student
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                              Track applications and get guidance
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors">
+                        <RadioGroupItem value="advisor" id="advisor" />
+                        <div className="flex items-center space-x-2 flex-1">
+                          <Users className="h-5 w-5 text-primary" />
+                          <div>
+                            <Label htmlFor="advisor" className="font-medium cursor-pointer">
+                              Advisor
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                              Guide and mentor students
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </RadioGroup>
                   </div>
                   <Button type="submit" className="w-full" disabled={isSigningUp}>
                     {isSigningUp ? "Creating account..." : "Create Account"}
