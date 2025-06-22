@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,20 +7,25 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Users, CheckCircle, Clock, Plus } from "lucide-react";
+import { Calendar, Users, CheckCircle, Clock, Plus, Search, UserPlus, MessageSquare } from "lucide-react";
 import { useAdvisor } from "@/hooks/useAdvisor";
 import { useAdvisorTasks } from "@/hooks/useAdvisorTasks";
 import { format } from "date-fns";
 
 const AdvisorDashboard = () => {
-  const { useAdvisorStudents, useAdvisorRequests, respondToRequest } = useAdvisor();
+  const { useAdvisorStudents, useAdvisorRequests, respondToRequest, useSearchStudents, sendConnectionRequest } = useAdvisor();
   const { useAdvisorTasksQuery, createTask } = useAdvisorTasks();
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [connectionDialogOpen, setConnectionDialogOpen] = useState(false);
+  const [selectedStudentForConnection, setSelectedStudentForConnection] = useState<any>(null);
+  const [connectionMessage, setConnectionMessage] = useState("");
 
   const { data: students = [], isLoading: studentsLoading } = useAdvisorStudents();
   const { data: requests = [], isLoading: requestsLoading } = useAdvisorRequests();
   const { data: tasks = [], isLoading: tasksLoading } = useAdvisorTasksQuery();
+  const { data: searchResults = [], isLoading: searchLoading } = useSearchStudents(searchTerm);
 
   const handleCreateTask = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,6 +44,19 @@ const AdvisorDashboard = () => {
 
   const handleRequestResponse = (requestId: string, status: 'approved' | 'rejected') => {
     respondToRequest.mutate({ requestId, status });
+  };
+
+  const handleSendConnectionRequest = () => {
+    if (!selectedStudentForConnection) return;
+
+    sendConnectionRequest.mutate({
+      studentId: selectedStudentForConnection.id,
+      message: connectionMessage,
+    });
+
+    setConnectionDialogOpen(false);
+    setSelectedStudentForConnection(null);
+    setConnectionMessage("");
   };
 
   const pendingRequests = requests.filter(req => req.status === 'pending');
@@ -100,6 +117,7 @@ const AdvisorDashboard = () => {
         <Tabs defaultValue="students" className="space-y-6">
           <TabsList>
             <TabsTrigger value="students">My Students</TabsTrigger>
+            <TabsTrigger value="search">Add Students</TabsTrigger>
             <TabsTrigger value="requests">Requests ({pendingRequests.length})</TabsTrigger>
             <TabsTrigger value="tasks">Tasks</TabsTrigger>
           </TabsList>
@@ -181,6 +199,65 @@ const AdvisorDashboard = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="search" className="space-y-6">
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Search for Students</h2>
+              <p className="text-muted-foreground">Search for students to add to your courseload and send them connection requests.</p>
+              
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, email, or high school..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              <div className="grid gap-4">
+                {searchLoading ? (
+                  <p>Searching...</p>
+                ) : searchResults.length === 0 && searchTerm.trim() ? (
+                  <Card>
+                    <CardContent className="p-6 text-center">
+                      <p className="text-muted-foreground">No students found matching your search.</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  searchResults.map((student) => (
+                    <Card key={student.id}>
+                      <CardHeader>
+                        <CardTitle className="text-lg">{student.full_name}</CardTitle>
+                        <CardDescription>{student.email}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            {student.high_school && (
+                              <p className="text-sm text-muted-foreground">
+                                {student.high_school}
+                              </p>
+                            )}
+                          </div>
+                          <Button
+                            onClick={() => {
+                              setSelectedStudentForConnection(student);
+                              setConnectionDialogOpen(true);
+                            }}
+                            size="sm"
+                          >
+                            <UserPlus className="w-4 h-4 mr-2" />
+                            Send Request
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </div>
+          </TabsContent>
+
           <TabsContent value="requests" className="space-y-6">
             <h2 className="text-xl font-semibold">Pending Requests</h2>
             <div className="grid gap-4">
@@ -199,21 +276,24 @@ const AdvisorDashboard = () => {
                       <CardTitle className="text-lg">Request from {request.student?.full_name}</CardTitle>
                       <CardDescription>{request.student?.email}</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      {request.message && <p>{request.message}</p>}
-                      <div className="flex gap-2">
+                    <CardContent>
+                      {request.message && (
+                        <p className="text-sm text-muted-foreground mb-4">{request.message}</p>
+                      )}
+                      <div className="flex space-x-2">
                         <Button
                           onClick={() => handleRequestResponse(request.id, 'approved')}
                           size="sm"
+                          className="bg-green-600 hover:bg-green-700"
                         >
-                          Accept
+                          Approve
                         </Button>
                         <Button
                           onClick={() => handleRequestResponse(request.id, 'rejected')}
-                          variant="outline"
                           size="sm"
+                          variant="destructive"
                         >
-                          Decline
+                          Reject
                         </Button>
                       </div>
                     </CardContent>
@@ -224,7 +304,7 @@ const AdvisorDashboard = () => {
           </TabsContent>
 
           <TabsContent value="tasks" className="space-y-6">
-            <h2 className="text-xl font-semibold">All Tasks</h2>
+            <h2 className="text-xl font-semibold">Tasks</h2>
             <div className="grid gap-4">
               {tasksLoading ? (
                 <p>Loading tasks...</p>
@@ -238,23 +318,25 @@ const AdvisorDashboard = () => {
                 tasks.map((task) => (
                   <Card key={task.id}>
                     <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="text-lg">{task.title}</CardTitle>
-                          <CardDescription>For {task.student?.full_name}</CardDescription>
-                        </div>
+                      <CardTitle className="text-lg">{task.title}</CardTitle>
+                      <CardDescription>
+                        Assigned to: {students.find(s => s.student_id === task.student_id)?.student?.full_name}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {task.description && (
+                        <p className="text-sm text-muted-foreground mb-2">{task.description}</p>
+                      )}
+                      <div className="flex items-center justify-between">
                         <Badge variant={task.status === 'completed' ? 'default' : 'secondary'}>
                           {task.status}
                         </Badge>
+                        {task.due_date && (
+                          <span className="text-sm text-muted-foreground">
+                            Due: {format(new Date(task.due_date), 'MMM dd, yyyy')}
+                          </span>
+                        )}
                       </div>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      {task.description && <p>{task.description}</p>}
-                      {task.due_date && (
-                        <p className="text-sm text-muted-foreground">
-                          Due: {format(new Date(task.due_date), 'MMM dd, yyyy')}
-                        </p>
-                      )}
                     </CardContent>
                   </Card>
                 ))
@@ -262,6 +344,57 @@ const AdvisorDashboard = () => {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Connection Request Dialog */}
+        <Dialog open={connectionDialogOpen} onOpenChange={setConnectionDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Send Connection Request</DialogTitle>
+            </DialogHeader>
+            {selectedStudentForConnection && (
+              <div className="space-y-4">
+                <div className="p-4 border rounded-lg bg-muted/20">
+                  <h3 className="font-medium">{selectedStudentForConnection.full_name}</h3>
+                  <p className="text-sm text-muted-foreground">{selectedStudentForConnection.email}</p>
+                  {selectedStudentForConnection.high_school && (
+                    <p className="text-sm text-muted-foreground">{selectedStudentForConnection.high_school}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <Label htmlFor="message">Message (optional)</Label>
+                  <Textarea
+                    id="message"
+                    value={connectionMessage}
+                    onChange={(e) => setConnectionMessage(e.target.value)}
+                    placeholder="Add a personal message to your connection request..."
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => {
+                      setConnectionDialogOpen(false);
+                      setSelectedStudentForConnection(null);
+                      setConnectionMessage("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleSendConnectionRequest}
+                    disabled={sendConnectionRequest.isPending}
+                  >
+                    {sendConnectionRequest.isPending ? "Sending..." : "Send Request"}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

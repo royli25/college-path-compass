@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,11 +6,13 @@ import RatingCard from "@/components/ui/rating-card";
 import FloatingAIAssistant from "@/components/ui/floating-ai-assistant";
 import FullBreakdownModal from "@/components/ui/full-breakdown-modal";
 import ProfileCompletionAlert from "@/components/ProfileCompletionAlert";
-import { BookOpen, Calendar, FileText, Target, TrendingUp, ExternalLink, Zap, Shield, Heart, Users, User, List } from "lucide-react";
+import { BookOpen, Calendar, FileText, Target, TrendingUp, ExternalLink, Zap, Shield, Heart, Users, User, List, UserCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useProfileStrength, useProfileData } from "@/hooks/useProfileData";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdvisor } from "@/hooks/useAdvisor";
+import { Badge } from "@/components/ui/badge";
 
 const Dashboard = () => {
   const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
@@ -19,6 +20,8 @@ const Dashboard = () => {
   const { strength, isComplete, isLoading } = useProfileStrength();
   const { data: profile } = useProfileData();
   const { userRole } = useAuth();
+  const { useStudentAdvisor } = useAdvisor();
+  const { data: advisorRelationship } = useStudentAdvisor();
   const navigate = useNavigate();
 
   // Redirect advisors to their dashboard
@@ -145,6 +148,53 @@ const Dashboard = () => {
 
           {/* Profile Completion Alert */}
           <ProfileCompletionAlert completionPercentage={strength.overall} />
+
+          {/* Advisor Connection Status */}
+          <Card className="ultra-card">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <UserCheck className="h-5 w-5" />
+                <span>Advisor Connection</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {advisorRelationship ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-foreground">
+                        Connected with {advisorRelationship.advisor?.full_name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {advisorRelationship.advisor?.email}
+                      </p>
+                    </div>
+                    <Badge variant="default" className="bg-green-600">
+                      Connected
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Your advisor can help you with essay feedback, application strategy, and more.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-foreground">No advisor connected</p>
+                      <p className="text-sm text-muted-foreground">
+                        Connect with an advisor to get personalized guidance
+                      </p>
+                    </div>
+                    <Badge variant="secondary">Not Connected</Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Advisors can help you with essay feedback, application strategy, and personalized guidance.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Profile Strength Overview */}
           <div className="space-y-6">

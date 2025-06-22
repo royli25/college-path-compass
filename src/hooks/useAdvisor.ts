@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,6 +6,85 @@ import { toast } from "@/hooks/use-toast";
 export const useAdvisor = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // Search for students to add to courseload
+  const useSearchStudents = (searchTerm: string) => {
+    return useQuery({
+      queryKey: ['search-students', searchTerm],
+      queryFn: async () => {
+        if (!searchTerm.trim()) return [];
+
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, full_name, email, high_school')
+          .or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,high_school.ilike.%${searchTerm}%`)
+          .neq('id', user?.id) // Exclude current user
+          .limit(10);
+        
+        if (error) throw error;
+
+        // Filter out students who are already connected to this advisor
+        const { data: existingConnections } = await supabase
+          .from('advisor_students')
+          .select('student_id')
+          .eq('advisor_id', user?.id);
+
+        const existingStudentIds = existingConnections?.map(c => c.student_id) || [];
+        
+        return data?.filter(student => !existingStudentIds.includes(student.id)) || [];
+      },
+      enabled: !!user && searchTerm.trim().length > 0,
+    });
+  };
+
+  // Send connection request to student
+  const sendConnectionRequest = useMutation({
+    mutationFn: async ({ studentId, message }: { studentId: string; message?: string }) => {
+      // Create the advisor request
+      const { data: request, error: requestError } = await supabase
+        .from('advisor_student_requests')
+        .insert({
+          advisor_id: user?.id,
+          student_id: studentId,
+          message,
+          status: 'pending',
+        })
+        .select()
+        .single();
+      
+      if (requestError) throw requestError;
+
+      // Create notification for the student
+      const { error: notificationError } = await supabase
+        .from('notifications')
+        .insert({
+          user_id: studentId,
+          title: 'New Advisor Request',
+          message: `You have received a new advisor connection request. Click to view details.`,
+          type: 'advisor_request',
+          is_read: false,
+        });
+
+      if (notificationError) throw notificationError;
+
+      return request;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['advisor-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['search-students'] });
+      toast({
+        title: "Request Sent",
+        description: "Your connection request has been sent to the student.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to send connection request. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Fetch advisor-student requests
   const useAdvisorRequests = () => {
@@ -165,6 +243,19 @@ export const useAdvisor = () => {
           });
         
         if (relationError) throw relationError;
+
+        // Create notification for the advisor
+        const { error: notificationError } = await supabase
+          .from('notifications')
+          .insert({
+            user_id: data.advisor_id,
+            title: 'Request Approved',
+            message: `A student has approved your connection request.`,
+            type: 'advisor_request_approved',
+            is_read: false,
+          });
+
+        if (notificationError) throw notificationError;
       }
       
       return data;
@@ -189,6 +280,8 @@ export const useAdvisor = () => {
   });
 
   return {
+    useSearchStudents,
+    sendConnectionRequest,
     useAdvisorRequests,
     useAdvisorStudents,
     useStudentAdvisor,
