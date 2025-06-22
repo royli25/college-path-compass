@@ -15,15 +15,29 @@ export const useAdvisorTasks = () => {
       queryFn: async () => {
         const { data, error } = await supabase
           .from('advisor_tasks')
-          .select(`
-            *,
-            student:profiles!advisor_tasks_student_id_fkey(full_name, email)
-          `)
+          .select('*')
           .eq('advisor_id', user?.id)
           .order('created_at', { ascending: false });
         
         if (error) throw error;
-        return data;
+
+        // Fetch student profile data separately
+        const enriched = await Promise.all(
+          data.map(async (task) => {
+            const { data: studentProfile } = await supabase
+              .from('profiles')
+              .select('full_name, email')
+              .eq('id', task.student_id)
+              .single();
+
+            return {
+              ...task,
+              student: studentProfile
+            };
+          })
+        );
+
+        return enriched;
       },
       enabled: !!user,
     });
@@ -36,15 +50,29 @@ export const useAdvisorTasks = () => {
       queryFn: async () => {
         const { data, error } = await supabase
           .from('advisor_tasks')
-          .select(`
-            *,
-            advisor:profiles!advisor_tasks_advisor_id_fkey(full_name, email)
-          `)
+          .select('*')
           .eq('student_id', user?.id)
           .order('created_at', { ascending: false });
         
         if (error) throw error;
-        return data;
+
+        // Fetch advisor profile data separately
+        const enriched = await Promise.all(
+          data.map(async (task) => {
+            const { data: advisorProfile } = await supabase
+              .from('profiles')
+              .select('full_name, email')
+              .eq('id', task.advisor_id)
+              .single();
+
+            return {
+              ...task,
+              advisor: advisorProfile
+            };
+          })
+        );
+
+        return enriched;
       },
       enabled: !!user,
     });

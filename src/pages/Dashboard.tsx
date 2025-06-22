@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import RatingCard from "@/components/ui/rating-card";
@@ -74,7 +75,7 @@ const Dashboard = () => {
       <div className="min-h-screen bg-background">
         {/* Fixed AI Assistant */}
         <div className="fixed right-0 top-0 bottom-0 w-80 lg:w-96 xl:w-[400px] z-30 hidden md:block">
-          <FloatingAIAssistant />
+          <FloatingAIAssistant isCollapsed={false} onToggle={() => {}} />
         </div>
         
         {/* Main Content with right padding to account for fixed AI assistant */}

@@ -17,13 +17,30 @@ export const useAdvisor = () => {
           .from('advisor_student_requests')
           .select(`
             *,
-            advisor:profiles!advisor_student_requests_advisor_id_fkey(full_name, email),
-            student:profiles!advisor_student_requests_student_id_fkey(full_name, email)
+            advisor:advisor_id(id),
+            student:student_id(id)
           `)
           .order('created_at', { ascending: false });
         
         if (error) throw error;
-        return data;
+
+        // Fetch profile data separately
+        const enriched = await Promise.all(
+          data.map(async (request) => {
+            const [advisorProfile, studentProfile] = await Promise.all([
+              supabase.from('profiles').select('full_name, email').eq('id', request.advisor_id).single(),
+              supabase.from('profiles').select('full_name, email').eq('id', request.student_id).single()
+            ]);
+
+            return {
+              ...request,
+              advisor: advisorProfile.data,
+              student: studentProfile.data
+            };
+          })
+        );
+
+        return enriched;
       },
       enabled: !!user,
     });
@@ -36,15 +53,29 @@ export const useAdvisor = () => {
       queryFn: async () => {
         const { data, error } = await supabase
           .from('advisor_students')
-          .select(`
-            *,
-            student:profiles!advisor_students_student_id_fkey(full_name, email)
-          `)
+          .select('*')
           .eq('advisor_id', user?.id)
           .order('created_at', { ascending: false });
         
         if (error) throw error;
-        return data;
+
+        // Fetch student profile data separately
+        const enriched = await Promise.all(
+          data.map(async (relationship) => {
+            const { data: studentProfile } = await supabase
+              .from('profiles')
+              .select('full_name, email')
+              .eq('id', relationship.student_id)
+              .single();
+
+            return {
+              ...relationship,
+              student: studentProfile
+            };
+          })
+        );
+
+        return enriched;
       },
       enabled: !!user,
     });
@@ -57,15 +88,24 @@ export const useAdvisor = () => {
       queryFn: async () => {
         const { data, error } = await supabase
           .from('advisor_students')
-          .select(`
-            *,
-            advisor:profiles!advisor_students_advisor_id_fkey(full_name, email)
-          `)
+          .select('*')
           .eq('student_id', user?.id)
           .single();
         
         if (error && error.code !== 'PGRST116') throw error;
-        return data;
+        if (!data) return null;
+
+        // Fetch advisor profile data separately
+        const { data: advisorProfile } = await supabase
+          .from('profiles')
+          .select('full_name, email')
+          .eq('id', data.advisor_id)
+          .single();
+
+        return {
+          ...data,
+          advisor: advisorProfile
+        };
       },
       enabled: !!user,
     });
