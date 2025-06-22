@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,6 +32,14 @@ export const useAdvisor = () => {
         }
         
         console.log('Raw matching profiles (before filtering current user):', matchingProfiles);
+        
+        // Let's see each profile ID specifically
+        if (matchingProfiles && matchingProfiles.length > 0) {
+          matchingProfiles.forEach((profile, index) => {
+            console.log(`Profile ${index + 1}: ID=${profile.id}, Email=${profile.email}, Name=${profile.full_name}`);
+            console.log(`Is this the current user? ${profile.id === user?.id}`);
+          });
+        }
         
         // Filter out current user manually to avoid issues
         const profilesExcludingCurrentUser = matchingProfiles?.filter(profile => profile.id !== user?.id) || [];
