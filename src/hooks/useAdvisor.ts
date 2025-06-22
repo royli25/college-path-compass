@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,9 +17,9 @@ export const useAdvisor = () => {
         console.log('=== STUDENT SEARCH DEBUG ===');
         console.log('Search term:', searchTerm);
         console.log('Current user ID:', user?.id);
+        console.log('Current user email:', user?.email);
 
         // 1. First search for profiles that match the email search term
-        console.log('Step 1: Searching profiles with email like:', `%${searchTerm}%`);
         const { data: matchingProfiles, error: profilesError } = await supabase
           .from('profiles')
           .select('id, full_name, email, high_school')
@@ -31,29 +30,29 @@ export const useAdvisor = () => {
           throw profilesError;
         }
         
-        console.log('Raw matching profiles (before filtering current user):', matchingProfiles);
+        console.log('Raw matching profiles found:', matchingProfiles);
         
-        // Let's see each profile ID specifically
+        // Check if we found the profile but it has the same ID as current user
         if (matchingProfiles && matchingProfiles.length > 0) {
-          matchingProfiles.forEach((profile, index) => {
-            console.log(`Profile ${index + 1}: ID=${profile.id}, Email=${profile.email}, Name=${profile.full_name}`);
-            console.log(`Is this the current user? ${profile.id === user?.id}`);
-          });
+          const foundProfile = matchingProfiles[0];
+          if (foundProfile.id === user?.id) {
+            console.warn('WARNING: Found profile has same ID as current user!');
+            console.warn('This suggests duplicate user records in the database.');
+            console.warn(`Profile email: ${foundProfile.email}, Current user email: ${user?.email}`);
+            return [];
+          }
         }
         
-        // Filter out current user manually to avoid issues
+        // Filter out current user
         const profilesExcludingCurrentUser = matchingProfiles?.filter(profile => profile.id !== user?.id) || [];
-        console.log('Profiles after excluding current user:', profilesExcludingCurrentUser);
         
         if (profilesExcludingCurrentUser.length === 0) {
-          console.log('No matching profiles found after excluding current user');
+          console.log('No profiles found after excluding current user');
           return [];
         }
 
         // 2. Filter to only include users who have the 'student' role
-        console.log('Step 2: Checking which profiles have student role');
         const profileIds = profilesExcludingCurrentUser.map(p => p.id);
-        console.log('Profile IDs to check for student role:', profileIds);
         
         const { data: studentRoles, error: rolesError } = await supabase
           .from('user_roles')
@@ -67,35 +66,29 @@ export const useAdvisor = () => {
         }
 
         const studentUserIds = studentRoles?.map(r => r.user_id) || [];
-        console.log('Users with student role:', studentUserIds);
-
-        // 3. Filter profiles to only include students
+        
         const studentProfiles = profilesExcludingCurrentUser.filter(profile => 
           studentUserIds.includes(profile.id)
         );
-
-        console.log('Final student profiles found:', studentProfiles);
 
         if (studentProfiles.length === 0) {
           console.log('No profiles found with student role');
           return [];
         }
 
-        // 4. Filter out students already connected to this advisor
-        console.log('Step 3: Checking for existing connections');
+        // 3. Filter out students already connected to this advisor
         const { data: existingConnections } = await supabase
           .from('advisor_students')
           .select('student_id')
           .eq('advisor_id', user?.id);
 
         const existingStudentIds = existingConnections?.map(c => c.student_id) || [];
-        console.log('Students already connected to this advisor:', existingStudentIds);
         
         const availableStudents = studentProfiles.filter(student => 
           !existingStudentIds.includes(student.id)
         );
 
-        console.log('Final available students to connect:', availableStudents);
+        console.log('Final available students:', availableStudents);
         console.log('=== END STUDENT SEARCH DEBUG ===');
         
         return availableStudents.slice(0, 10); // Limit to 10 results
