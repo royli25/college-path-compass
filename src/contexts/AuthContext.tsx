@@ -138,15 +138,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    
-    // Always redirect to the auth page. If there was an error, it's likely
-    // because the session was already invalid, so redirecting is the correct action.
-    // On success, the user is signed out and should be on the auth page.
-    window.location.href = '/auth';
-
-    if (error) {
-      console.error('Error signing out:', error.message);
+    try {
+      // Clear local state first
+      setUser(null);
+      setSession(null);
+      setUserRole(null);
+      
+      // Clear any stored auth tokens
+      localStorage.removeItem('supabase.auth.token');
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      // Attempt to sign out from Supabase (don't throw if it fails)
+      try {
+        await supabase.auth.signOut();
+      } catch (error) {
+        console.log('Sign out error (continuing anyway):', error);
+      }
+      
+      // Always redirect to auth page
+      window.location.href = '/auth';
+    } catch (error) {
+      console.error('Error during sign out:', error);
+      // Even if there's an error, redirect to auth page
+      window.location.href = '/auth';
     }
   };
 
