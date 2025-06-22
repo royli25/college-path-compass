@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import RatingCard from "@/components/ui/rating-card";
@@ -12,6 +11,7 @@ import { useProfileStrength, useProfileData } from "@/hooks/useProfileData";
 
 const Dashboard = () => {
   const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
+  const [isAiCollapsed, setIsAiCollapsed] = useState(false);
   const { strength, isComplete, isLoading } = useProfileStrength();
   const { data: profile } = useProfileData();
 
@@ -98,12 +98,23 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Fixed AI Assistant - Hidden on mobile, responsive width on larger screens */}
-      <div className="fixed right-0 top-0 bottom-0 w-80 lg:w-96 xl:w-[400px] z-30 hidden md:block">
-        <FloatingAIAssistant />
+      <div 
+        className={`fixed right-0 top-0 bottom-0 z-30 hidden md:block transition-all duration-300 ${
+          isAiCollapsed ? "w-16" : "w-80 lg:w-96 xl:w-[400px]"
+        }`}
+      >
+        <FloatingAIAssistant 
+          isCollapsed={isAiCollapsed} 
+          onToggle={() => setIsAiCollapsed(!isAiCollapsed)} 
+        />
       </div>
 
       {/* Main Content Area with responsive right padding to account for fixed AI assistant */}
-      <div className="pr-0 md:pr-80 lg:pr-96 xl:pr-[400px] p-8">
+      <div 
+        className={`transition-all duration-300 p-8 ${
+          isAiCollapsed ? "pr-16" : "pr-0 md:pr-80 lg:pr-96 xl:pr-[400px]"
+        }`}
+      >
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Welcome Header */}
           <div className="space-y-2">

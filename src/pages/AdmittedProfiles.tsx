@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Search, GraduationCap, MapPin, Trophy, BookOpen } from "lucide-react";
+import { Search, GraduationCap, MapPin, Trophy, BookOpen, FileText } from "lucide-react";
 import { useAdmittedProfiles } from "@/hooks/useAdmittedProfiles";
 import { Link } from "react-router-dom";
 
@@ -115,11 +114,20 @@ const AdmittedProfiles = () => {
                     {profile.high_school}
                   </div>
 
-                  {profile.intended_major && (
-                    <Badge variant="secondary" className="w-fit">
-                      {profile.intended_major}
+                  <div className="flex items-center justify-between">
+                    {profile.intended_major && (
+                      <Badge variant="secondary" className="w-fit">
+                        {profile.intended_major}
+                      </Badge>
+                    )}
+                    <Badge 
+                      variant={profile.essay_excerpts?.length ? "outline" : "secondary"} 
+                      className="flex items-center gap-1"
+                    >
+                      <FileText className="h-3 w-3" />
+                      {profile.essay_excerpts?.length || 0} Essays
                     </Badge>
-                  )}
+                  </div>
                 </CardHeader>
 
                 <CardContent className="pt-0">

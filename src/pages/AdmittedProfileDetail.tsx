@@ -1,12 +1,12 @@
-
 import { useParams, Link } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, GraduationCap, MapPin, Trophy, BookOpen, Users, Award, Quote } from "lucide-react";
+import { ArrowLeft, GraduationCap, MapPin, Trophy, BookOpen, Users, Award, Quote, FileText } from "lucide-react";
 import { useAdmittedProfile } from "@/hooks/useAdmittedProfiles";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const AdmittedProfileDetail = () => {
   const { profileId } = useParams();
@@ -112,6 +112,58 @@ const AdmittedProfileDetail = () => {
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Essays Section - Full Width */}
+        <div className="mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Essays
+              </CardTitle>
+              <CardDescription>
+                Read essays from {profile.name}'s college applications
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {profile.essay_excerpts && profile.essay_excerpts.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {profile.essay_excerpts.map((essay: any, index: number) => (
+                    <Card key={index} className="bg-muted/30">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg">{essay.title}</CardTitle>
+                        {essay.prompt && <p className="text-sm text-muted-foreground pt-1">{essay.prompt}</p>}
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-foreground/80 line-clamp-3 mb-4">
+                          {essay.content}
+                        </p>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="secondary" size="sm">Read Full Essay</Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-3xl h-[80vh]">
+                            <DialogHeader>
+                              <DialogTitle>{essay.title}</DialogTitle>
+                            </DialogHeader>
+                            <div className="prose dark:prose-invert overflow-y-auto h-full pr-4">
+                              <p>{essay.content}</p>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-muted-foreground py-8">
+                  <FileText className="h-8 w-8 mx-auto mb-2" />
+                  <p>No essays are available for this profile yet.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
