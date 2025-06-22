@@ -1,4 +1,6 @@
 
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import RatingCard from "@/components/ui/rating-card";
@@ -9,12 +11,27 @@ import { BookOpen, Calendar, FileText, Target, TrendingUp, ExternalLink, Zap, Sh
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useProfileStrength, useProfileData } from "@/hooks/useProfileData";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
   const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
   const [isAiCollapsed, setIsAiCollapsed] = useState(false);
   const { strength, isComplete, isLoading } = useProfileStrength();
   const { data: profile } = useProfileData();
+  const { userRole } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect advisors to their dashboard
+  useEffect(() => {
+    if (!isLoading && userRole === 'advisor') {
+      navigate('/advisor/dashboard', { replace: true });
+    }
+  }, [userRole, isLoading, navigate]);
+
+  // Don't render student dashboard for advisors
+  if (userRole === 'advisor') {
+    return null;
+  }
 
   const profileStrengths = [
     {
@@ -110,7 +127,6 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Main Content Area with responsive right padding to account for fixed AI assistant */}
       <div 
         className={`transition-all duration-300 p-8 ${
           isAiCollapsed ? "pr-16" : "pr-0 md:pr-80 lg:pr-96 xl:pr-[400px]"

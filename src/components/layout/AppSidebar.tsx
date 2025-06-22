@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from "react-router-dom";
 import { 
   GraduationCap, 
@@ -8,7 +9,9 @@ import {
   BarChart3,
   Settings,
   Users,
-  Newspaper
+  Newspaper,
+  UserCheck,
+  MessageSquare
 } from "lucide-react";
 import {
   Sidebar,
@@ -24,8 +27,9 @@ import {
 } from "@/components/ui/sidebar";
 import NotificationsDropdown from "@/components/ui/notifications-dropdown";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
-const navigationItems = [
+const studentNavigationItems = [
   {
     title: "Dashboard",
     icon: BarChart3,
@@ -48,6 +52,19 @@ const navigationItems = [
   },
 ];
 
+const advisorNavigationItems = [
+  {
+    title: "Advisor Dashboard",
+    icon: BarChart3,
+    url: "/advisor/dashboard",
+  },
+  {
+    title: "My Students",
+    icon: UserCheck,
+    url: "/student/advisor",
+  },
+];
+
 const resourceItems = [
   {
     title: "Admitted Profiles",
@@ -63,6 +80,10 @@ const resourceItems = [
 
 export function AppSidebar() {
   const location = useLocation();
+  const { userRole } = useAuth();
+
+  // Choose navigation items based on user role
+  const navigationItems = userRole === 'advisor' ? advisorNavigationItems : studentNavigationItems;
 
   return (
     <Sidebar className="border-r border-sidebar-border bg-sidebar h-screen overflow-hidden">
@@ -109,7 +130,7 @@ export function AppSidebar() {
               })}
             </SidebarMenu>
 
-            {/* Resources section directly below navigation */}
+            {/* Resources section - show for all users */}
             <div className="mt-8">
               <div className="text-muted-foreground uppercase tracking-wider text-xs font-medium mb-2 flex-shrink-0">
                 Resources (debug)

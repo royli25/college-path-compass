@@ -87,9 +87,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (data.user && !error) {
-        // Force page reload for clean state
+        // Get user role to determine redirect
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', data.user.id)
+          .single();
+        
+        const role = roleData?.role || 'student';
+        
+        // Force page reload with role-appropriate redirect
         setTimeout(() => {
-          window.location.href = '/dashboard';
+          if (role === 'advisor') {
+            window.location.href = '/advisor/dashboard';
+          } else {
+            window.location.href = '/dashboard';
+          }
         }, 100);
       }
       
@@ -101,7 +114,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string, fullName: string, role: 'student' | 'advisor' = 'student') => {
     try {
-      const redirectUrl = `${window.location.origin}/dashboard`;
+      const redirectUrl = role === 'advisor' 
+        ? `${window.location.origin}/advisor/dashboard`
+        : `${window.location.origin}/dashboard`;
       
       const { data, error } = await supabase.auth.signUp({
         email,
