@@ -1,10 +1,8 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Plus, Search, MapPin } from "lucide-react";
 import { useSchoolsCatalog, useAddSchoolToList } from "@/hooks/useSchools";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -39,15 +37,6 @@ const AddSchoolFromCatalogDialog = () => {
         setOpen(false);
       }
     });
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "reach": return "destructive";
-      case "target": return "default";
-      case "safety": return "secondary";
-      default: return "outline";
-    }
   };
 
   return (
@@ -98,11 +87,6 @@ const AddSchoolFromCatalogDialog = () => {
                             </div>
                           )}
                           <div className="flex items-center gap-2 mt-2">
-                            {school.type && (
-                              <Badge variant={getTypeColor(school.type)} className="text-xs">
-                                {school.type}
-                              </Badge>
-                            )}
                             {school.acceptance_rate && (
                               <span className="text-xs text-muted-foreground">
                                 {school.acceptance_rate} acceptance

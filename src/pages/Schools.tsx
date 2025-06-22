@@ -63,19 +63,6 @@ const Schools = () => {
     return acc;
   }, {} as Record<string, string>);
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "reach":
-        return "destructive";
-      case "target":
-        return "default";
-      case "safety":
-        return "secondary";
-      default:
-        return "outline";
-    }
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Submitted":
