@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,38 +15,70 @@ export const useAdvisor = () => {
       queryFn: async () => {
         if (!searchTerm.trim()) return [];
 
-        // 1. Get all user IDs for students
-        const { data: studentRoles, error: rolesError } = await supabase
-            .from('user_roles')
-            .select('user_id')
-            .eq('role', 'student');
+        console.log('Searching for students with term:', searchTerm);
 
-        if (rolesError) throw rolesError;
-        if (!studentRoles || studentRoles.length === 0) return [];
-
-        const studentUserIds = studentRoles.map(r => r.user_id);
-
-        // 2. Search within student profiles
-        const { data, error } = await supabase
+        // 1. First search for profiles that match the email search term
+        const { data: matchingProfiles, error: profilesError } = await supabase
           .from('profiles')
           .select('id, full_name, email, high_school')
-          .in('id', studentUserIds)
           .ilike('email', `%${searchTerm}%`)
-          .neq('id', user?.id) // Exclude current user
-          .limit(10);
-        
-        if (error) throw error;
-        if (!data) return [];
+          .neq('id', user?.id); // Exclude current user
 
-        // 3. Filter out students already connected to this advisor
+        if (profilesError) {
+          console.error('Error searching profiles:', profilesError);
+          throw profilesError;
+        }
+        
+        if (!matchingProfiles || matchingProfiles.length === 0) {
+          console.log('No matching profiles found');
+          return [];
+        }
+
+        console.log('Found matching profiles:', matchingProfiles);
+
+        // 2. Filter to only include users who have the 'student' role
+        const profileIds = matchingProfiles.map(p => p.id);
+        const { data: studentRoles, error: rolesError } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'student')
+          .in('user_id', profileIds);
+
+        if (rolesError) {
+          console.error('Error checking student roles:', rolesError);
+          throw rolesError;
+        }
+
+        const studentUserIds = studentRoles?.map(r => r.user_id) || [];
+        console.log('Student user IDs:', studentUserIds);
+
+        // 3. Filter profiles to only include students
+        const studentProfiles = matchingProfiles.filter(profile => 
+          studentUserIds.includes(profile.id)
+        );
+
+        console.log('Student profiles found:', studentProfiles);
+
+        if (studentProfiles.length === 0) {
+          console.log('No student profiles found');
+          return [];
+        }
+
+        // 4. Filter out students already connected to this advisor
         const { data: existingConnections } = await supabase
           .from('advisor_students')
           .select('student_id')
           .eq('advisor_id', user?.id);
 
         const existingStudentIds = existingConnections?.map(c => c.student_id) || [];
+        console.log('Existing connections:', existingStudentIds);
         
-        return data.filter(student => !existingStudentIds.includes(student.id));
+        const availableStudents = studentProfiles.filter(student => 
+          !existingStudentIds.includes(student.id)
+        );
+
+        console.log('Available students to connect:', availableStudents);
+        return availableStudents.slice(0, 10); // Limit to 10 results
       },
       enabled: !!user && searchTerm.trim().length > 0,
     });
