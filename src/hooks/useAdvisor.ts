@@ -14,16 +14,30 @@ export const useAdvisor = () => {
       queryFn: async () => {
         if (!searchTerm.trim()) return [];
 
+        // 1. Get all user IDs for students
+        const { data: studentRoles, error: rolesError } = await supabase
+            .from('user_roles')
+            .select('user_id')
+            .eq('role', 'student');
+
+        if (rolesError) throw rolesError;
+        if (!studentRoles || studentRoles.length === 0) return [];
+
+        const studentUserIds = studentRoles.map(r => r.user_id);
+
+        // 2. Search within student profiles
         const { data, error } = await supabase
           .from('profiles')
           .select('id, full_name, email, high_school')
-          .or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,high_school.ilike.%${searchTerm}%`)
+          .in('id', studentUserIds)
+          .ilike('email', `%${searchTerm}%`)
           .neq('id', user?.id) // Exclude current user
           .limit(10);
         
         if (error) throw error;
+        if (!data) return [];
 
-        // Filter out students who are already connected to this advisor
+        // 3. Filter out students already connected to this advisor
         const { data: existingConnections } = await supabase
           .from('advisor_students')
           .select('student_id')
@@ -31,7 +45,7 @@ export const useAdvisor = () => {
 
         const existingStudentIds = existingConnections?.map(c => c.student_id) || [];
         
-        return data?.filter(student => !existingStudentIds.includes(student.id)) || [];
+        return data.filter(student => !existingStudentIds.includes(student.id));
       },
       enabled: !!user && searchTerm.trim().length > 0,
     });

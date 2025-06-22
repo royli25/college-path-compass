@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -49,16 +48,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
+        if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setSession(null);
+          setUserRole(null);
+          window.location.href = '/auth';
+        } else if (session?.user) {
+          setSession(session);
+          setUser(session.user);
           // Defer role fetching to prevent deadlocks
           setTimeout(() => {
             fetchUserRole(session.user.id);
           }, 0);
-        } else {
-          setUserRole(null);
         }
         
         setLoading(false);
@@ -137,14 +138,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      setUser(null);
-      setSession(null);
-      setUserRole(null);
-      window.location.href = '/auth';
-    } catch (error) {
-      console.error('Error signing out:', error);
+    const { error } = await supabase.auth.signOut();
+    
+    // Always redirect to the auth page. If there was an error, it's likely
+    // because the session was already invalid, so redirecting is the correct action.
+    // On success, the user is signed out and should be on the auth page.
+    window.location.href = '/auth';
+
+    if (error) {
+      console.error('Error signing out:', error.message);
     }
   };
 

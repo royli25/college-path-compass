@@ -202,12 +202,12 @@ const AdvisorDashboard = () => {
           <TabsContent value="search" className="space-y-6">
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">Search for Students</h2>
-              <p className="text-muted-foreground">Search for students to add to your courseload and send them connection requests.</p>
+              <p className="text-muted-foreground">Search for students by their email address to add them to your courseload and send connection requests.</p>
               
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by name, email, or high school..."
+                  placeholder="Search by student email address..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
