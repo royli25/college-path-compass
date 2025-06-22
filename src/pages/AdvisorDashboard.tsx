@@ -202,12 +202,12 @@ const AdvisorDashboard = () => {
           <TabsContent value="search" className="space-y-6">
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">Search for Students</h2>
-              <p className="text-muted-foreground">Search for students by their email address to add them to your courseload and send connection requests.</p>
+              <p className="text-muted-foreground">Search for students by their unique student ID to add them to your courseload and send connection requests.</p>
               
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by student email address..."
+                  placeholder="Search by student ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -220,7 +220,7 @@ const AdvisorDashboard = () => {
                 ) : searchResults.length === 0 && searchTerm.trim() ? (
                   <Card>
                     <CardContent className="p-6 text-center">
-                      <p className="text-muted-foreground">No students found matching your search.</p>
+                      <p className="text-muted-foreground">No students found with that student ID.</p>
                     </CardContent>
                   </Card>
                 ) : (
@@ -228,7 +228,12 @@ const AdvisorDashboard = () => {
                     <Card key={student.id}>
                       <CardHeader>
                         <CardTitle className="text-lg">{student.full_name}</CardTitle>
-                        <CardDescription>{student.email}</CardDescription>
+                        <CardDescription>
+                          <div className="space-y-1">
+                            <p>Student ID: {student.student_id}</p>
+                            <p>Email: {student.email}</p>
+                          </div>
+                        </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="flex items-center justify-between">

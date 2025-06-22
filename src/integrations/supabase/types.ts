@@ -421,6 +421,7 @@ export type Database = {
           leadership_positions: string[] | null
           race_ethnicity: string | null
           sat_act_score: string | null
+          student_id: string | null
           updated_at: string | null
           years_involved: number | null
         }
@@ -445,6 +446,7 @@ export type Database = {
           leadership_positions?: string[] | null
           race_ethnicity?: string | null
           sat_act_score?: string | null
+          student_id?: string | null
           updated_at?: string | null
           years_involved?: number | null
         }
@@ -469,6 +471,7 @@ export type Database = {
           leadership_positions?: string[] | null
           race_ethnicity?: string | null
           sat_act_score?: string | null
+          student_id?: string | null
           updated_at?: string | null
           years_involved?: number | null
         }

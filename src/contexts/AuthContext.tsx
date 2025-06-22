@@ -8,7 +8,7 @@ interface AuthContextType {
   userRole: 'admin' | 'student' | 'advisor' | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, fullName: string, role?: 'student' | 'advisor') => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, role?: 'student' | 'advisor', studentId?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -113,21 +113,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signUp = async (email: string, password: string, fullName: string, role: 'student' | 'advisor' = 'student') => {
+  const signUp = async (email: string, password: string, fullName: string, role: 'student' | 'advisor' = 'student', studentId?: string) => {
     try {
       const redirectUrl = role === 'advisor' 
         ? `${window.location.origin}/advisor/dashboard`
         : `${window.location.origin}/dashboard`;
+      
+      const metadata: any = {
+        full_name: fullName,
+        role: role
+      };
+
+      // Add student_id to metadata if provided and role is student
+      if (role === 'student' && studentId) {
+        metadata.student_id = studentId;
+      }
       
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: redirectUrl,
-          data: {
-            full_name: fullName,
-            role: role
-          }
+          data: metadata
         }
       });
       

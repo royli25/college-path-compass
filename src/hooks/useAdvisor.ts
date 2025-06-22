@@ -7,7 +7,7 @@ export const useAdvisor = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Search for students to add to courseload
+  // Search for students to add to courseload by student ID
   const useSearchStudents = (searchTerm: string) => {
     return useQuery({
       queryKey: ['search-students', searchTerm],
@@ -15,15 +15,15 @@ export const useAdvisor = () => {
         if (!searchTerm.trim()) return [];
 
         console.log('=== STUDENT SEARCH DEBUG ===');
-        console.log('Search term:', searchTerm);
+        console.log('Search term (student ID):', searchTerm);
         console.log('Current user ID:', user?.id);
-        console.log('Current user email:', user?.email);
 
-        // 1. First search for profiles that match the email search term
+        // 1. First search for profiles that match the student ID
         const { data: matchingProfiles, error: profilesError } = await supabase
           .from('profiles')
-          .select('id, full_name, email, high_school')
-          .ilike('email', `%${searchTerm}%`);
+          .select('id, full_name, email, high_school, student_id')
+          .ilike('student_id', `%${searchTerm}%`)
+          .not('student_id', 'is', null); // Only include profiles with student_id set
 
         if (profilesError) {
           console.error('Error searching profiles:', profilesError);
@@ -32,18 +32,7 @@ export const useAdvisor = () => {
         
         console.log('Raw matching profiles found:', matchingProfiles);
         
-        // Check if we found the profile but it has the same ID as current user
-        if (matchingProfiles && matchingProfiles.length > 0) {
-          const foundProfile = matchingProfiles[0];
-          if (foundProfile.id === user?.id) {
-            console.warn('WARNING: Found profile has same ID as current user!');
-            console.warn('This suggests duplicate user records in the database.');
-            console.warn(`Profile email: ${foundProfile.email}, Current user email: ${user?.email}`);
-            return [];
-          }
-        }
-        
-        // Filter out current user
+        // Filter out current user (advisor shouldn't find themselves)
         const profilesExcludingCurrentUser = matchingProfiles?.filter(profile => profile.id !== user?.id) || [];
         
         if (profilesExcludingCurrentUser.length === 0) {
