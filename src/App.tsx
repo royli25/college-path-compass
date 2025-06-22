@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -21,6 +22,8 @@ import AdmittedProfiles from "./pages/AdmittedProfiles";
 import AdmittedProfileDetail from "./pages/AdmittedProfileDetail";
 import AdmittedStudentsBlog from "./pages/AdmittedStudentsBlog";
 import Settings from "./pages/Settings";
+import AdvisorDashboard from "./pages/AdvisorDashboard";
+import StudentAdvisor from "./pages/StudentAdvisor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,6 +56,8 @@ function App() {
                               <Route path="schools/:schoolId/research" element={<SchoolResearch />} />
                               <Route path="essays" element={<Essays />} />
                               <Route path="admin/schools" element={<AdminSchools />} />
+                              <Route path="advisor/dashboard" element={<AdvisorDashboard />} />
+                              <Route path="student/advisor" element={<StudentAdvisor />} />
                               <Route path="resources/admitted-profiles" element={<AdmittedProfiles />} />
                               <Route path="resources/admitted-profiles/:profileId" element={<AdmittedProfileDetail />} />
                               <Route path="resources/admitted-students-blog" element={<AdmittedStudentsBlog />} />

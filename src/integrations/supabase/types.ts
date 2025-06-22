@@ -87,6 +87,120 @@ export type Database = {
         }
         Relationships: []
       }
+      advisor_notes: {
+        Row: {
+          advisor_id: string
+          content: string
+          created_at: string | null
+          id: string
+          student_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          advisor_id: string
+          content: string
+          created_at?: string | null
+          id?: string
+          student_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          advisor_id?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          student_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      advisor_student_requests: {
+        Row: {
+          advisor_id: string
+          created_at: string | null
+          id: string
+          message: string | null
+          status: string | null
+          student_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          advisor_id: string
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          status?: string | null
+          student_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          advisor_id?: string
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          status?: string | null
+          student_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      advisor_students: {
+        Row: {
+          advisor_id: string
+          created_at: string | null
+          id: string
+          student_id: string
+        }
+        Insert: {
+          advisor_id: string
+          created_at?: string | null
+          id?: string
+          student_id: string
+        }
+        Update: {
+          advisor_id?: string
+          created_at?: string | null
+          id?: string
+          student_id?: string
+        }
+        Relationships: []
+      }
+      advisor_tasks: {
+        Row: {
+          advisor_id: string
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          status: string | null
+          student_id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          advisor_id: string
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          status?: string | null
+          student_id: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          advisor_id?: string
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          status?: string | null
+          student_id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       document_chunks: {
         Row: {
           chunk_index: number
@@ -157,6 +271,50 @@ export type Database = {
           uploaded_by?: string | null
         }
         Relationships: []
+      }
+      essay_feedback: {
+        Row: {
+          advisor_id: string
+          content: string
+          created_at: string | null
+          essay_id: string
+          id: string
+          position_end: number | null
+          position_start: number | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          advisor_id: string
+          content: string
+          created_at?: string | null
+          essay_id: string
+          id?: string
+          position_end?: number | null
+          position_start?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          advisor_id?: string
+          content?: string
+          created_at?: string | null
+          essay_id?: string
+          id?: string
+          position_end?: number | null
+          position_start?: number | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "essay_feedback_essay_id_fkey"
+            columns: ["essay_id"]
+            isOneToOne: false
+            referencedRelation: "essays"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       essays: {
         Row: {

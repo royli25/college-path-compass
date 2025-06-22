@@ -6,9 +6,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   adminOnly?: boolean;
+  advisorOnly?: boolean;
+  studentOnly?: boolean;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = false }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+  children, 
+  adminOnly = false,
+  advisorOnly = false,
+  studentOnly = false
+}) => {
   const { user, userRole, loading } = useAuth();
 
   if (loading) {
@@ -34,6 +41,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = f
   }
 
   if (adminOnly && userRole !== 'admin') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (advisorOnly && userRole !== 'advisor') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (studentOnly && userRole !== 'student') {
     return <Navigate to="/dashboard" replace />;
   }
 
