@@ -55,7 +55,7 @@ const NotificationsDropdown = () => {
   };
 
   const getNotificationTitle = (notification: any) => {
-    if (notification.type === 'advisor_request') {
+    if (notification.type === 'advisor-request') {
       // Find the most recent pending request for this user
       const request = pendingRequests[0]; // Assuming the most recent one
       return request ? `Advisor Request from ${request.advisor?.full_name}` : notification.title;
@@ -64,7 +64,7 @@ const NotificationsDropdown = () => {
   };
 
   const getNotificationMessage = (notification: any) => {
-    if (notification.type === 'advisor_request') {
+    if (notification.type === 'advisor-request') {
       // Find the most recent pending request for this user
       const request = pendingRequests[0]; // Assuming the most recent one
       return request?.message || notification.message;
@@ -155,7 +155,7 @@ const NotificationsDropdown = () => {
               </div>
               
               {/* Show action buttons for advisor requests */}
-              {notification.type === 'advisor_request' && (
+              {notification.type === 'advisor-request' && (
                 <div className="flex space-x-2 mt-2 w-full">
                   <Button
                     size="sm"

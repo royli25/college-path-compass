@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,7 +33,17 @@ export const useNotifications = () => {
           .order('created_at', { ascending: false });
         
         if (error) throw error;
-        return (data || []) as Notification[];
+        
+        // Transform the data to match our Notification interface
+        return (data || []).map(item => ({
+          id: item.id,
+          user_id: item.user_id,
+          created_at: item.created_at,
+          is_read: item.is_read,
+          message: item.message,
+          type: item.type as 'advisor-request' | 'application-reminder' | 'essay-feedback' | 'default',
+          metadata: {} // Default empty metadata since it's not in the database yet
+        })) as Notification[];
       },
       enabled: !!user,
     });
@@ -94,4 +105,4 @@ export const useNotifications = () => {
     markAllAsRead,
     deleteNotification,
   };
-}; 
+};
