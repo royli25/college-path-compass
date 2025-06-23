@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Checkbox } from "./ui/checkbox";
@@ -6,6 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Plus, Pencil } from 'lucide-react';
+import { useWeeklyTasks } from "@/hooks/useWeeklyTasks";
+import { toast } from "sonner";
 
 interface ToDo {
   id: number;
@@ -18,16 +21,23 @@ interface PlannedWeek {
   weekLabel: string;
   goal: string;
   tasks: string[];
+  weekStartDate: string;
 }
 
 const ToDoLog = () => {
   const [todos, setTodos] = useState<ToDo[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isPlanNextWeekDialogOpen, setIsPlanNextWeekDialogOpen] = useState(false);
   const [weeklyGoal, setWeeklyGoal] = useState("");
   const [individualTasks, setIndividualTasks] = useState<string[]>([""]);
-  const [plannedWeeks, setPlannedWeeks] = useState<PlannedWeek[]>([]);
-  const [editWeekIndex, setEditWeekIndex] = useState<number | null>(null); // null = not editing, 0 = current week, 1+ = plannedWeeks
+  const [editWeekIndex, setEditWeekIndex] = useState<number | null>(null);
+  
+  const { 
+    currentWeekTasks, 
+    plannedWeeks, 
+    isLoading, 
+    saveWeeklyTasks, 
+    getWeekStartDate 
+  } = useWeeklyTasks();
 
   const handleAddToDo = (title: string, description: string) => {
     const newToDo = {
@@ -62,23 +72,26 @@ const ToDoLog = () => {
   }
 
   const today = new Date();
-  const weekLabel = getWeekLabelRange(today);
+  const currentWeekStart = getWeekStartDate(today);
+  const weekLabel = getWeekLabelRange(currentWeekStart);
 
   // For "Plan Next Week" card
   const nextWeek = new Date();
   nextWeek.setDate(today.getDate() + 7);
-  const nextWeekLabel = getWeekLabelRange(nextWeek);
+  const nextWeekStart = getWeekStartDate(nextWeek);
+  const nextWeekLabel = getWeekLabelRange(nextWeekStart);
 
   // Open dialog for editing a week
   const openEditDialog = (weekIdx: number | null) => {
     setEditWeekIndex(weekIdx);
     if (weekIdx === 0) {
       // Editing current week
-      setWeeklyGoal(currentWeekData.goal || "");
-      setIndividualTasks(currentWeekData.tasks || [""]);
+      setWeeklyGoal(currentWeekTasks?.week_goal || "");
+      setIndividualTasks(currentWeekTasks?.tasks || [""]);
     } else if (weekIdx != null && plannedWeeks[weekIdx - 1]) {
-      setWeeklyGoal(plannedWeeks[weekIdx - 1].goal);
-      setIndividualTasks(plannedWeeks[weekIdx - 1].tasks.length ? plannedWeeks[weekIdx - 1].tasks : [""]);
+      const week = plannedWeeks[weekIdx - 1];
+      setWeeklyGoal(week.week_goal || "");
+      setIndividualTasks(week.tasks?.length ? week.tasks : [""]);
     } else {
       setWeeklyGoal("");
       setIndividualTasks([""]);
@@ -87,33 +100,50 @@ const ToDoLog = () => {
   };
 
   // Save handler for both current and planned weeks
-  const handleSaveWeeklyLog = () => {
+  const handleSaveWeeklyLog = async () => {
     const tasks = individualTasks.filter(task => task.trim() !== "");
-    if (editWeekIndex === 0) {
-      // Save to current week (replace with your logic)
-      // For now, just log
-      console.log("Save current week:", { goal: weeklyGoal, tasks });
-    } else if (editWeekIndex != null && editWeekIndex > 0) {
-      setPlannedWeeks(prev => prev.map((w, i) => i === editWeekIndex - 1 ? { ...w, goal: weeklyGoal, tasks } : w));
-    } else {
-      // Add new planned week
-      setPlannedWeeks(prev => [
-        ...prev,
-        {
-          weekLabel: nextWeekLabel,
-          goal: weeklyGoal,
-          tasks,
-        },
-      ]);
+    
+    try {
+      if (editWeekIndex === 0) {
+        // Save current week
+        const weekStartString = currentWeekStart.toISOString().split('T')[0];
+        await saveWeeklyTasks(weekStartString, weeklyGoal, tasks);
+        toast.success("Current week updated successfully!");
+      } else {
+        // Save planned week (next week or new week)
+        const weekStartString = nextWeekStart.toISOString().split('T')[0];
+        await saveWeeklyTasks(weekStartString, weeklyGoal, tasks);
+        toast.success("Week planned successfully!");
+      }
+      
+      setIsDialogOpen(false);
+      setWeeklyGoal("");
+      setIndividualTasks([""]);
+      setEditWeekIndex(null);
+    } catch (error) {
+      console.error('Error saving weekly tasks:', error);
+      toast.error("Failed to save weekly tasks. Please try again.");
     }
-    setIsDialogOpen(false);
-    setWeeklyGoal("");
-    setIndividualTasks([""]);
-    setEditWeekIndex(null);
   };
 
-  // Dummy current week data (replace with real data if available)
-  const currentWeekData = { goal: '', tasks: [] as string[] };
+  if (isLoading) {
+    return (
+      <div className="mb-8">
+        <h2 className="text-xl font-medium text-foreground">Weekly Log</h2>
+        <div className="mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="h-80 flex flex-col p-4 animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mb-8">
@@ -130,14 +160,18 @@ const ToDoLog = () => {
               <Pencil className="h-4 w-4 text-muted-foreground" />
             </button>
             <div className="font-semibold mb-2">{weekLabel}</div>
-            {currentWeekData.goal ? (
+            {currentWeekTasks?.week_goal || currentWeekTasks?.tasks?.length ? (
               <>
-                <div className="mb-2 text-muted-foreground">{currentWeekData.goal}</div>
-                <ul className="list-disc pl-5 text-sm">
-                  {currentWeekData.tasks.map((task, i) => (
-                    <li key={i}>{task}</li>
-                  ))}
-                </ul>
+                {currentWeekTasks.week_goal && (
+                  <div className="mb-2 text-muted-foreground">{currentWeekTasks.week_goal}</div>
+                )}
+                {currentWeekTasks.tasks && currentWeekTasks.tasks.length > 0 && (
+                  <ul className="list-disc pl-5 text-sm">
+                    {currentWeekTasks.tasks.map((task, i) => (
+                      <li key={i}>{task}</li>
+                    ))}
+                  </ul>
+                )}
               </>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center">
@@ -145,25 +179,36 @@ const ToDoLog = () => {
               </div>
             )}
           </Card>
+          
           {/* Planned weeks */}
-          {plannedWeeks.map((week, idx) => (
-            <Card key={week.weekLabel + idx} className="h-80 flex flex-col p-4 relative">
-              <button
-                className="absolute top-2 right-2 p-1 rounded hover:bg-muted"
-                onClick={() => openEditDialog(idx + 1)}
-                aria-label="Edit week"
-              >
-                <Pencil className="h-4 w-4 text-muted-foreground" />
-              </button>
-              <div className="font-semibold mb-2">{week.weekLabel}</div>
-              <div className="mb-2 text-muted-foreground">{week.goal}</div>
-              <ul className="list-disc pl-5 text-sm">
-                {week.tasks.map((task, i) => (
-                  <li key={i}>{task}</li>
-                ))}
-              </ul>
-            </Card>
-          ))}
+          {plannedWeeks.map((week, idx) => {
+            const weekStart = new Date(week.week_start_date);
+            const weekDisplayLabel = getWeekLabelRange(weekStart);
+            
+            return (
+              <Card key={week.id} className="h-80 flex flex-col p-4 relative">
+                <button
+                  className="absolute top-2 right-2 p-1 rounded hover:bg-muted"
+                  onClick={() => openEditDialog(idx + 1)}
+                  aria-label="Edit week"
+                >
+                  <Pencil className="h-4 w-4 text-muted-foreground" />
+                </button>
+                <div className="font-semibold mb-2">{weekDisplayLabel}</div>
+                {week.week_goal && (
+                  <div className="mb-2 text-muted-foreground">{week.week_goal}</div>
+                )}
+                {week.tasks && week.tasks.length > 0 && (
+                  <ul className="list-disc pl-5 text-sm">
+                    {week.tasks.map((task, i) => (
+                      <li key={i}>{task}</li>
+                    ))}
+                  </ul>
+                )}
+              </Card>
+            );
+          })}
+          
           {/* Plan Next Week cell */}
           <Card
             className="h-80 flex flex-col items-center justify-center cursor-pointer hover:bg-muted relative"
@@ -182,6 +227,7 @@ const ToDoLog = () => {
             </div>
           </Card>
         </div>
+        
         {/* Dialog for editing/adding weeks */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent>
@@ -264,4 +310,4 @@ const AddToDoForm = ({ onAdd }: AddToDoFormProps) => {
   );
 };
 
-export default ToDoLog; 
+export default ToDoLog;
