@@ -102,9 +102,9 @@ const ToDoLog = () => {
         weekStartString = currentWeekStart.toISOString().split('T')[0];
         await saveWeeklyTasks(weekStartString, weeklyGoal, tasks);
         toast.success("Current week updated successfully!");
-      } else if (editWeekIndex != null && editWeekIndex > 0) {
+      } else if (editWeekIndex != null && editWeekIndex > 0 && editWeekStartDate) {
         // Save existing planned week
-        weekStartString = editWeekStartDate!;
+        weekStartString = editWeekStartDate;
         await saveWeeklyTasks(weekStartString, weeklyGoal, tasks);
         toast.success("Week updated successfully!");
       } else {
@@ -112,10 +112,9 @@ const ToDoLog = () => {
         let nextWeekStart: Date;
         
         if (plannedWeeks.length === 0) {
-          // No planned weeks yet, use next week
-          nextWeekStart = new Date(today);
-          nextWeekStart.setDate(today.getDate() + 7);
-          nextWeekStart = getWeekStartDate(nextWeekStart);
+          // No planned weeks yet, use next week after current week
+          nextWeekStart = new Date(currentWeekStart);
+          nextWeekStart.setDate(currentWeekStart.getDate() + 7);
         } else {
           // Find the latest planned week and add one more week
           const latestPlannedWeek = plannedWeeks[plannedWeeks.length - 1];
@@ -124,6 +123,7 @@ const ToDoLog = () => {
         }
         
         weekStartString = nextWeekStart.toISOString().split('T')[0];
+        console.log('Saving new week with start date:', weekStartString);
         await saveWeeklyTasks(weekStartString, weeklyGoal, tasks);
         toast.success("New week planned successfully!");
       }
