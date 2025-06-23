@@ -24,6 +24,7 @@ import Settings from "./pages/Settings";
 import AdvisorDashboard from "./pages/AdvisorDashboard";
 import StudentAdvisor from "./pages/StudentAdvisor";
 import NotFound from "./pages/NotFound";
+import { DarkModeLayout } from "./components/layout/DarkModeLayout";
 
 const queryClient = new QueryClient();
 
@@ -36,7 +37,7 @@ function App() {
             <Toaster />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<DarkModeLayout><Index /></DarkModeLayout>} />
                 <Route path="/welcome" element={<Welcome />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route

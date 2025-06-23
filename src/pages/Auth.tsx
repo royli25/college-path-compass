@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,17 +71,16 @@ const Auth = () => {
             <span>Back to home</span>
           </Link>
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-primary/10 rounded-full">
-              <GraduationCap className="h-8 w-8 text-primary" />
-            </div>
+            <img src="/myblueprint.png" alt="MyBlueprint Logo" className="h-10 mx-auto mb-4 block dark:hidden" />
+            <img src="/myblueprint_dark.png" alt="MyBlueprint Logo" className="h-10 mx-auto mb-4 hidden dark:block" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Welcome to MyBlueprint</h1>
+          <h1 className="text-xl font-bold text-foreground">Welcome</h1>
           <p className="text-muted-foreground mt-2">Start organizing your college applications today</p>
         </div>
 
         <Card className="border-0 shadow-lg">
           <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-center text-xl">Get Started</CardTitle>
+            <CardTitle className="text-center text-lg">Get Started</CardTitle>
           </CardHeader>
           <CardContent>
             {error && (

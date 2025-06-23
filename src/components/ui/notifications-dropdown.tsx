@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Bell, Check, X, Trash2 } from "lucide-react";
+import { Bell, Check, X, Trash2, UserCheck, Calendar, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotifications, Notification } from "@/hooks/useNotifications";
 import { useAdvisor } from "@/hooks/useAdvisor";
 import { format } from "date-fns";
 
@@ -41,14 +41,16 @@ const NotificationsDropdown = () => {
     respondToRequest.mutate({ requestId, status });
   };
 
-  const getNotificationIcon = (type: string | null) => {
+  const getIconForType = (type: Notification['type']) => {
     switch (type) {
-      case 'advisor_request':
-        return <Bell className="h-4 w-4 text-blue-500" />;
-      case 'advisor_request_approved':
-        return <Check className="h-4 w-4 text-green-500" />;
+      case 'advisor-request':
+        return <UserCheck className="h-4 w-4 text-primary" />;
+      case 'application-reminder':
+        return <Calendar className="h-4 w-4 text-yellow-500" />;
+      case 'essay-feedback':
+        return <FileText className="h-4 w-4 text-green-500" />;
       default:
-        return <Bell className="h-4 w-4 text-gray-500" />;
+        return <Bell className="h-4 w-4 text-primary" />;
     }
   };
 
@@ -117,7 +119,7 @@ const NotificationsDropdown = () => {
             <DropdownMenuItem key={notification.id} className="flex flex-col items-start p-3">
               <div className="flex items-start justify-between w-full">
                 <div className="flex items-start space-x-2 flex-1">
-                  {getNotificationIcon(notification.type)}
+                  {getIconForType(notification.type)}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
                       {getNotificationTitle(notification)}

@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Users, DollarSign, Star, BookOpen, FileText, Trash2 } from "lucide-react";
+import { MapPin, Users, DollarSign, Star, BookOpen, FileText, Trash2, Eye } from "lucide-react";
 import { useUserSchools } from "@/hooks/useSchools";
 import AddSchoolFromCatalogDialog from "@/components/AddSchoolFromCatalogDialog";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,6 +11,8 @@ import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { School } from "lucide-react";
 
 const Schools = () => {
   const { userRole } = useAuth();
@@ -68,7 +70,7 @@ const Schools = () => {
       case "Submitted":
         return "bg-green-500/20 text-green-400 border-green-500/30";
       case "In Progress":
-        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+        return "bg-primary/20 text-primary border-primary/30";
       case "Not Started":
         return "bg-gray-500/20 text-gray-400 border-gray-500/30";
       default:
@@ -88,7 +90,7 @@ const Schools = () => {
         <div className="max-w-6xl mx-auto">
           <Card className="ultra-card text-center py-12">
             <CardContent>
-              <p className="text-lg text-destructive mb-4">Error loading schools</p>
+              <p className="text-base text-destructive mb-4">Error loading schools</p>
               <p className="text-sm text-muted-foreground">{error.message}</p>
             </CardContent>
           </Card>
@@ -103,10 +105,10 @@ const Schools = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <h1 className="text-4xl font-medium text-foreground tracking-tight">
+            <h1 className="text-3xl font-medium text-foreground tracking-tight">
               {userRole === 'admin' ? 'All School Lists' : 'My School List'}
             </h1>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               {userRole === 'admin' ? 'Manage all student school lists' : 'Research and organize your target colleges'}
             </p>
           </div>
@@ -146,99 +148,65 @@ const Schools = () => {
               
               return (
                 <Card key={school.id} className="ultra-card smooth-hover">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-4 flex-1">
-                        <div className="flex-1 space-y-3">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="text-xl font-medium text-foreground">{school.name}</h3>
-                              <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-1">
-                                {school.location && (
-                                  <div className="flex items-center space-x-1">
-                                    <MapPin className="h-3 w-3" />
-                                    <span>{school.location}</span>
-                                  </div>
-                                )}
-                                {school.ranking && (
-                                  <div className="flex items-center space-x-1">
-                                    <Star className="h-3 w-3" />
-                                    <span>{school.ranking}</span>
-                                  </div>
-                                )}
-                                {userRole === 'student' && (
-                                  <div className="flex items-center space-x-1">
-                                    <FileText className="h-3 w-3" />
-                                    <span>{hasResearch ? 'Research Available' : 'No Research'}</span>
-                                  </div>
-                                )}
-                              </div>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between gap-6">
+                      {/* Left: School Info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-medium text-foreground mb-1 truncate">{school.name}</h3>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                          {school.location && (
+                            <div className="flex items-center space-x-1">
+                              <MapPin className="h-3 w-3" />
+                              <span>{school.location}</span>
                             </div>
-                            <div className="flex items-center space-x-2">
-                              {/* Removed status tag */}
+                          )}
+                          {school.ranking && (
+                            <div className="flex items-center space-x-1">
+                              <Star className="h-3 w-3" />
+                              <span>{school.ranking}</span>
                             </div>
-                          </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                            {school.acceptance_rate && (
-                              <div className="flex items-center space-x-2">
-                                <Users className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">Accept Rate:</span>
-                                <span className="text-foreground font-medium">{school.acceptance_rate}</span>
-                              </div>
-                            )}
-                            {school.tuition && (
-                              <div className="flex items-center space-x-2">
-                                <DollarSign className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">Tuition:</span>
-                                <span className="text-foreground font-medium">{school.tuition}</span>
-                              </div>
-                            )}
-                            {school.major && (
-                              <div className="flex items-center space-x-2">
-                                <BookOpen className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">Major:</span>
-                                <span className="text-foreground font-medium">{school.major}</span>
-                              </div>
-                            )}
-                            {school.deadline && (
-                              <div className="flex items-center space-x-2">
-                                <span className="text-muted-foreground">Deadline:</span>
-                                <span className="text-foreground font-medium">
-                                  {new Date(school.deadline).toLocaleDateString()}
-                                </span>
-                              </div>
-                            )}
-                          </div>
+                          )}
+                          {userRole === 'student' && (
+                            <div className="flex items-center space-x-1">
+                              <FileText className="h-3 w-3" />
+                              <span>{hasResearch ? 'Research Available' : 'No Research'}</span>
+                            </div>
+                          )}
+                          {school.acceptance_rate && (
+                            <div className="flex items-center space-x-1">
+                              <Users className="h-3 w-3" />
+                              <span>Accept Rate: <span className="font-medium text-foreground">{school.acceptance_rate}</span></span>
+                            </div>
+                          )}
+                          {school.tuition && (
+                            <div className="flex items-center space-x-1">
+                              <DollarSign className="h-3 w-3" />
+                              <span>Tuition: <span className="font-medium text-foreground">{school.tuition}</span></span>
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <div className="flex flex-col space-y-2 ml-4">
-                        <Button variant="outline" size="sm" className="rounded-xl">
-                          View Details
+
+                      {/* Right: Action Icons */}
+                      <div className="flex items-center gap-3 ml-4">
+                        <Button variant="ghost" size="icon" className="hover:bg-muted" title="View Details">
+                          <Eye className="h-5 w-5" />
                         </Button>
                         <Link to={`/schools/${school.id}/research`}>
-                          <Button 
-                            variant={hasResearch ? "default" : "secondary"} 
-                            size="sm" 
-                            className={`rounded-xl w-full flex items-center gap-2 ${
-                              hasResearch 
-                                ? "bg-blue-600 text-white hover:bg-blue-700" 
-                                : "bg-white text-black hover:bg-gray-100"
-                            }`}
-                          >
-                            <FileText className="h-4 w-4" />
-                            {hasResearch ? 'View Research' : 'Research Document'}
+                          <Button variant="ghost" size="icon" className="hover:bg-muted" title="Research Document">
+                            <FileText className="h-5 w-5" />
                           </Button>
                         </Link>
                         {userRole === 'student' && (
                           <Button 
-                            variant="destructive" 
-                            size="sm" 
-                            className="rounded-xl w-full flex items-center gap-2"
+                            variant="ghost" 
+                            size="icon" 
+                            className="hover:bg-destructive/10 text-destructive"
                             onClick={() => handleDeleteSchool(school.id, school.name)}
                             disabled={deleteSchoolMutation.isPending}
+                            title="Remove"
                           >
-                            <Trash2 className="h-4 w-4" />
-                            Remove
+                            <Trash2 className="h-5 w-5" />
                           </Button>
                         )}
                       </div>
@@ -251,14 +219,14 @@ const Schools = () => {
         )}
 
         {!isLoading && schools.length === 0 && (
-          <Card className="ultra-card text-center py-12">
-            <CardContent>
-              <div className="text-muted-foreground mb-4">
-                <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p className="text-lg">No schools in your list yet.</p>
-                <p className="text-sm">Add your first school to get started!</p>
-              </div>
-              {userRole === 'student' && <AddSchoolFromCatalogDialog />}
+          <Card className="ultra-card">
+            <CardContent className="text-center py-12">
+              <School className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium text-foreground">No schools in your list yet</h3>
+              <p className="text-muted-foreground mt-2 mb-6">
+                Add schools from our catalog to start tracking your applications.
+              </p>
+              <AddSchoolFromCatalogDialog />
             </CardContent>
           </Card>
         )}

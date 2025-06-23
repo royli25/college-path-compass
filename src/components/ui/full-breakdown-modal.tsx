@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -7,13 +6,31 @@ import { Card, CardContent } from "@/components/ui/card";
 interface FullBreakdownModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  strength: { overall: number; academic: number; extracurricular: number; personality: number; };
 }
 
-const FullBreakdownModal = ({ open, onOpenChange }: FullBreakdownModalProps) => {
+const getRatingCategory = (score: number) => {
+  if (score >= 80) return 'Exceptional';
+  if (score >= 60) return 'Strong';
+  if (score >= 40) return 'Developing';
+  return 'Needs Focus';
+};
+
+const getCategoryBadgeClass = (category: string) => {
+  switch (category) {
+    case 'Exceptional': return 'bg-green-600 text-white';
+    case 'Strong': return 'bg-primary text-primary-foreground';
+    case 'Developing': return 'bg-yellow-500 text-white';
+    case 'Needs Focus': return 'bg-red-600 text-white';
+    default: return 'bg-gray-500 text-white';
+  }
+}
+
+const FullBreakdownModal = ({ open, onOpenChange, strength }: FullBreakdownModalProps) => {
   const getTagColor = (tag: string) => {
     switch (tag) {
       case 'Standout': return 'bg-green-600 text-white';
-      case 'Valuable': return 'bg-blue-600 text-white';
+      case 'Valuable': return 'bg-primary text-primary-foreground';
       case 'Common': return 'bg-gray-600 text-white';
       default: return 'bg-gray-500 text-white';
     }

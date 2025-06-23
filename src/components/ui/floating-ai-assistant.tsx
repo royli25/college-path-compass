@@ -41,7 +41,10 @@ const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({ isCollapsed, 
   };
 
   return (
-    <div className={cn("h-full flex flex-col bg-background border-l border-border overflow-hidden", isCollapsed && "items-center")}>
+    <div className={cn(
+      "h-full flex flex-col bg-background border border-border overflow-hidden rounded-xl shadow-lg",
+      isCollapsed ? "items-center w-auto" : "w-full"
+    )}>
       <CardHeader className="flex-shrink-0 p-4 border-b border-border w-full">
         <div className="flex items-center justify-between">
           {!isCollapsed && (
@@ -49,7 +52,7 @@ const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({ isCollapsed, 
               <div className="p-2 rounded-full bg-primary/10">
                 <Sparkles className="h-4 w-4 text-primary" />
               </div>
-              AI Assistant
+              Your AI Navigator
             </CardTitle>
           )}
            <Button variant="ghost" size="icon" onClick={onToggle} className={cn(isCollapsed && "mx-auto")}>
@@ -58,7 +61,7 @@ const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({ isCollapsed, 
         </div>
         {!isCollapsed && (
           <p className="text-sm text-muted-foreground pt-2">
-            Get personalized college admissions advice
+            Navigate the complexities of college admissions with personalized AI guidance.
           </p>
         )}
       </CardHeader>
@@ -71,8 +74,11 @@ const FloatingAIAssistant: React.FC<FloatingAIAssistantProps> = ({ isCollapsed, 
                 {messages.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     <Bot className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="font-semibold text-foreground">
+                      Ready to chart your course?
+                    </p>
                     <p className="text-sm">
-                      Ask me anything about college admissions!
+                      Ask me anything from essay brainstorming to financial aid queries.
                     </p>
                     <div className="mt-4 grid gap-2">
                       <Button

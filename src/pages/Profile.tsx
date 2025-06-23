@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import { CheckCircle, Circle, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useProfileData, getStepCompletion, calculateProfileStrength } from "@/hooks/useProfileData";
@@ -61,22 +62,24 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-4xl font-medium text-foreground tracking-tight">Profile Builder</h1>
-          <p className="text-lg text-muted-foreground">
+          <h1 className="text-3xl font-medium text-foreground tracking-tight">Profile Builder</h1>
+          <p className="text-base text-muted-foreground">
             Let's build your comprehensive application profile step by step
           </p>
         </div>
+
+        <Separator />
 
         {/* Progress Overview */}
         <Card className="ultra-card">
           <CardContent className="p-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-medium text-foreground">Overall Progress</h2>
-                <span className="text-2xl font-semibold text-primary">{strength.overall}%</span>
+                <h2 className="text-lg font-medium text-foreground">Overall Progress</h2>
+                <span className="text-xl font-semibold text-primary">{strength.overall}%</span>
               </div>
               <Progress value={strength.overall} className="h-3 rounded-full" />
               <p className="text-sm text-muted-foreground">
@@ -100,14 +103,14 @@ const Profile = () => {
                   isCurrent ? 'ring-2 ring-primary shadow-xl shadow-primary/10' : ''
                 }`}
               >
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-4">
                       <div className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
-                        isCompleted 
-                          ? 'bg-green-500/20 text-green-400' 
-                          : isCurrent 
-                            ? 'bg-primary/20 text-primary' 
+                        isCompleted
+                          ? 'bg-green-500/20 text-green-400'
+                          : isCurrent
+                            ? 'bg-primary/20 text-primary'
                             : 'bg-secondary text-secondary-foreground'
                       }`}>
                         {isCompleted ? (
@@ -117,12 +120,12 @@ const Profile = () => {
                         )}
                       </div>
                       <div>
-                        <CardTitle className="text-xl text-foreground">{step.title}</CardTitle>
+                        <h3 className="text-lg font-medium text-foreground">{step.title}</h3>
                         <p className="text-muted-foreground">{step.description}</p>
                       </div>
                     </div>
-                    <Link to={`/profile/edit/${step.stepIndex}`}>
-                      <Button 
+                    <Link to={`/profile/edit/${step.stepIndex}`} className="flex-shrink-0 ml-4">
+                      <Button
                         variant={isCurrent ? "default" : isCompleted ? "outline" : "ghost"}
                         className="rounded-xl"
                         disabled={isUpcoming}
@@ -132,11 +135,9 @@ const Profile = () => {
                       </Button>
                     </Link>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
                     {step.fields.map((field, fieldIndex) => (
-                      <div 
+                      <div
                         key={fieldIndex}
                         className="flex items-center space-x-2 text-sm"
                       >

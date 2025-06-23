@@ -1,0 +1,5 @@
+{
+  "compilerOptions": {
+    "types": ["https://deno.land/x/supabin/ts/dev.d.ts"]
+  }
+} 

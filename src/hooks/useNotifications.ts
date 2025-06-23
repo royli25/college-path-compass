@@ -2,6 +2,20 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
+export interface Notification {
+  id: string;
+  user_id: string;
+  created_at: string;
+  is_read: boolean;
+  message: string;
+  type: 'advisor-request' | 'application-reminder' | 'essay-feedback' | 'default';
+  metadata: {
+    advisor_id?: string;
+    student_id?: string;
+    student_name?: string;
+  };
+}
+
 export const useNotifications = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -18,7 +32,7 @@ export const useNotifications = () => {
           .order('created_at', { ascending: false });
         
         if (error) throw error;
-        return data || [];
+        return (data || []) as Notification[];
       },
       enabled: !!user,
     });

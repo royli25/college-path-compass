@@ -110,6 +110,8 @@ const categories = [
 const AdmittedStudentsBlog = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   const filteredPosts = blogPosts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -134,151 +136,158 @@ const AdmittedStudentsBlog = () => {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Admitted Students Blog</h1>
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-2">Admitted Students Blog</h1>
           <p className="text-muted-foreground">
-            Expert insights, tips, and strategies to help you navigate your college application journey
+            Learn from the stories of successful applicants
           </p>
         </div>
 
-        {/* Search and Filters */}
-        <div className="mb-8 space-y-4">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search articles..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+        {isLoading ? (
+          <p>Loading articles...</p>
+        ) : isError ? (
+          <p>Error loading articles.</p>
+        ) : (
+          <div>
+            {/* Search and Filters */}
+            <div className="mb-8 space-y-4">
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search articles..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
 
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => {
-              const Icon = category.icon;
-              return (
-                <Button
-                  key={category.id}
-                  variant={selectedCategory === category.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category.id)}
-                  className="flex items-center gap-2"
-                >
-                  <Icon className="h-4 w-4" />
-                  {category.label}
-                </Button>
-              );
-            })}
-          </div>
-        </div>
+              <div className="flex flex-wrap gap-2">
+                {categories.map((category) => {
+                  const Icon = category.icon;
+                  return (
+                    <Button
+                      key={category.id}
+                      variant={selectedCategory === category.id ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedCategory(category.id)}
+                      className="flex items-center gap-2"
+                    >
+                      <Icon className="h-4 w-4" />
+                      {category.label}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
 
-        {/* Featured Articles */}
-        {featuredPosts.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-semibold mb-6">Featured Articles</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {featuredPosts.map((post) => (
-                <Card key={post.id} className="h-full hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardHeader>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="secondary">{post.category}</Badge>
-                      {post.featured && (
-                        <Badge className="bg-yellow-100 text-yellow-800">Featured</Badge>
-                      )}
-                    </div>
-                    <CardTitle className="text-xl mb-3">{post.title}</CardTitle>
-                    <p className="text-muted-foreground mb-4">{post.excerpt}</p>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                            {post.author.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="text-sm">
-                          <p className="font-medium">{post.author}</p>
-                          <p className="text-muted-foreground">{formatDate(post.publishedDate)}</p>
+            {/* Featured Articles */}
+            {featuredPosts.length > 0 && (
+              <div className="mb-12">
+                <h2 className="text-xl font-semibold mb-6">Featured Articles</h2>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {featuredPosts.map((post) => (
+                    <Card key={post.id} className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                      <CardHeader>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Badge variant="secondary">{post.category}</Badge>
+                          {post.featured && (
+                            <Badge className="bg-yellow-100 text-yellow-800">Featured</Badge>
+                          )}
+                        </div>
+                        <CardTitle className="text-xl mb-3">{post.title}</CardTitle>
+                        <p className="text-muted-foreground mb-4">{post.excerpt}</p>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                                {post.author.split(' ').map(n => n[0]).join('')}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="text-sm">
+                              <p className="font-medium">{post.author}</p>
+                              <p className="text-muted-foreground">{formatDate(post.publishedDate)}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Clock className="h-4 w-4" />
+                            {post.readTime} min read
+                          </div>
+                        </div>
+                      </CardHeader>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* All Articles */}
+            <div>
+              <h2 className="text-xl font-semibold mb-6">All Articles</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {regularPosts.map((post) => (
+                  <Card key={post.id} className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Badge variant="outline">{post.category}</Badge>
+                      </div>
+                      <CardTitle className="text-lg mb-3 line-clamp-2">{post.title}</CardTitle>
+                      <p className="text-muted-foreground text-sm mb-4 line-clamp-3">{post.excerpt}</p>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                              {post.author.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium">{post.author}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          {post.readTime} min
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        {post.readTime} min read
+                    </CardHeader>
+                    
+                    <CardContent className="pt-0">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {formatDate(post.publishedDate)}
+                        </span>
+                        <div className="flex gap-1">
+                          {post.tags.slice(0, 2).map((tag, index) => (
+                            <Badge key={index} variant="outline" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                          {post.tags.length > 2 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{post.tags.length - 2}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </CardHeader>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
 
-        {/* All Articles */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-6">All Articles</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {regularPosts.map((post) => (
-              <Card key={post.id} className="h-full hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Badge variant="outline">{post.category}</Badge>
-                  </div>
-                  <CardTitle className="text-lg mb-3 line-clamp-2">{post.title}</CardTitle>
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-3">{post.excerpt}</p>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                          {post.author.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-medium">{post.author}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      {post.readTime} min
-                    </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="pt-0">
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {formatDate(post.publishedDate)}
-                    </span>
-                    <div className="flex gap-1">
-                      {post.tags.slice(0, 2).map((tag, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                      {post.tags.length > 2 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{post.tags.length - 2}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
+            {/* Empty State */}
+            {filteredPosts.length === 0 && (
+              <Card className="text-center py-12">
+                <CardContent>
+                  <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-base font-medium mb-2">No articles found</h3>
+                  <p className="text-muted-foreground">
+                    Please check back later for new content.
+                  </p>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
-        </div>
-
-        {/* Empty State */}
-        {filteredPosts.length === 0 && (
-          <Card className="text-center py-12">
-            <CardContent>
-              <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">No articles found</h3>
-              <p className="text-muted-foreground">
-                Try adjusting your search terms or filters
-              </p>
-            </CardContent>
-          </Card>
         )}
       </div>
     </div>

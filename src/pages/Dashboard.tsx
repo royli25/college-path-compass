@@ -6,13 +6,14 @@ import RatingCard from "@/components/ui/rating-card";
 import FloatingAIAssistant from "@/components/ui/floating-ai-assistant";
 import FullBreakdownModal from "@/components/ui/full-breakdown-modal";
 import ProfileCompletionAlert from "@/components/ProfileCompletionAlert";
-import { BookOpen, Calendar, FileText, Target, TrendingUp, ExternalLink, Zap, Shield, Heart, Users, User, List, UserCheck } from "lucide-react";
+import { BookOpen, Calendar, FileText, Target, TrendingUp, ExternalLink, Zap, Shield, Heart, Users, User, List, UserCheck, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useProfileStrength, useProfileData } from "@/hooks/useProfileData";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdvisor } from "@/hooks/useAdvisor";
 import { Badge } from "@/components/ui/badge";
+import ToDoLog from "@/components/ToDoLog";
 
 const Dashboard = () => {
   const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
@@ -65,7 +66,7 @@ const Dashboard = () => {
       title: "Profile Builder",
       description: "Build a comprehensive academic and personal profile",
       href: "/profile",
-      color: "text-blue-400"
+      color: "text-primary"
     },
     {
       icon: BookOpen,
@@ -120,8 +121,8 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       {/* Fixed AI Assistant - Hidden on mobile, responsive width on larger screens */}
       <div 
-        className={`fixed right-0 top-0 bottom-0 z-30 hidden md:block transition-all duration-300 ${
-          isAiCollapsed ? "w-16" : "w-80 lg:w-96 xl:w-[400px]"
+        className={`fixed right-0 top-0 bottom-0 z-30 hidden md:block transition-all duration-300 p-4 ${
+          isAiCollapsed ? "w-24" : "w-80 lg:w-96 xl:w-[400px]"
         }`}
       >
         <FloatingAIAssistant 
@@ -138,10 +139,10 @@ const Dashboard = () => {
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Welcome Header */}
           <div className="space-y-2">
-            <h1 className="text-4xl font-medium text-foreground tracking-tight">
-              {`Welcome back${profile?.full_name ? ", " + profile.full_name : ""}!`}
+            <h1 className="text-3xl font-medium text-foreground tracking-tight">
+              {`Welcome back${profile?.full_name ? ", " + profile.full_name : ""}`}
             </h1>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               You're making excellent progress on your college applications.
             </p>
           </div>
@@ -149,77 +150,11 @@ const Dashboard = () => {
           {/* Profile Completion Alert */}
           <ProfileCompletionAlert completionPercentage={strength.overall} />
 
-          {/* Advisor Connection Status */}
-          <Card className="ultra-card">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <UserCheck className="h-5 w-5" />
-                <span>Advisor Connection</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {advisorRelationship ? (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-foreground">
-                        Connected with {advisorRelationship.advisor?.full_name}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {advisorRelationship.advisor?.email}
-                      </p>
-                    </div>
-                    <Badge variant="default" className="bg-green-600">
-                      Connected
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Your advisor can help you with essay feedback, application strategy, and more.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-foreground">No advisor connected</p>
-                      <p className="text-sm text-muted-foreground">
-                        Connect with an advisor to get personalized guidance
-                      </p>
-                    </div>
-                    <Badge variant="secondary">Not Connected</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Advisors can help you with essay feedback, application strategy, and personalized guidance.
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Profile Strength Overview */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-medium text-foreground">Profile Strength</h2>
-              <Button variant="outline" className="rounded-xl" onClick={() => setIsBreakdownOpen(true)}>
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Full Breakdown
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {profileStrengths.map((strength, index) => (
-                <RatingCard 
-                  key={index} 
-                  title={strength.title} 
-                  score={strength.score} 
-                  description={strength.description} 
-                />
-              ))}
-            </div>
-          </div>
+          <ToDoLog />
 
           {/* Features Overview */}
           <div className="space-y-6">
-            <h2 className="text-2xl font-medium text-foreground">Platform Features</h2>
+            <h2 className="text-xl font-medium text-foreground">Platform Features</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {features.map((feature, index) => {
                 const Icon = feature.icon;
@@ -264,7 +199,13 @@ const Dashboard = () => {
       </div>
 
       {/* Full Breakdown Modal */}
-      <FullBreakdownModal open={isBreakdownOpen} onOpenChange={setIsBreakdownOpen} />
+      {isBreakdownOpen && (
+        <FullBreakdownModal 
+          open={isBreakdownOpen}
+          onOpenChange={setIsBreakdownOpen}
+          strength={strength}
+        />
+      )}
     </div>
   );
 };

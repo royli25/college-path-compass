@@ -7,19 +7,44 @@ import { Separator } from "@/components/ui/separator";
 import { Bell, Shield, User, Palette, LogOut } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState, useEffect } from "react";
+import { useBeforeUnload } from "react-router-dom";
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
   const { signOut } = useAuth();
+  
+  const [currentTheme, setCurrentTheme] = useState(theme);
+  const [isDirty, setIsDirty] = useState(false);
+
+  useEffect(() => {
+    setIsDirty(currentTheme !== theme);
+  }, [currentTheme, theme]);
+
+  useBeforeUnload(
+    (event) => {
+      if (isDirty) {
+        event.preventDefault();
+      }
+    },
+    { capture: true }
+  );
 
   const handleSignOut = async () => {
     await signOut();
   };
 
+  const handleSave = () => {
+    if (currentTheme) {
+      setTheme(currentTheme);
+      setIsDirty(false);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Settings</h1>
+        <h1 className="text-2xl font-bold">Settings</h1>
         <p className="text-muted-foreground mt-2">
           Manage your account settings and preferences
         </p>
@@ -157,8 +182,8 @@ const Settings = () => {
               </div>
               <Switch 
                 id="darkMode" 
-                checked={theme === "dark"}
-                onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                checked={currentTheme === "dark"}
+                onCheckedChange={(checked) => setCurrentTheme(checked ? "dark" : "light")}
               />
             </div>
           </CardContent>
@@ -191,6 +216,13 @@ const Settings = () => {
           </CardContent>
         </Card>
       </div>
+
+      {isDirty && (
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 flex justify-end items-center shadow-lg">
+          <p className="text-sm text-muted-foreground mr-4">You have unsaved changes.</p>
+          <Button onClick={handleSave}>Save Changes</Button>
+        </div>
+      )}
     </div>
   );
 };

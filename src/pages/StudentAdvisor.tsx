@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,26 +9,22 @@ import { useAdvisorTasks } from "@/hooks/useAdvisorTasks";
 import { format } from "date-fns";
 
 const StudentAdvisor = () => {
-  const { useStudentAdvisor, useAdvisorRequests } = useAdvisor();
-  const { useStudentTasksQuery, updateTaskStatus } = useAdvisorTasks();
+  const { advisor, requests, requestsLoading } = useAdvisor();
+  const { tasks, tasksLoading, updateTaskStatus } = useAdvisorTasks();
 
-  const { data: advisor, isLoading: advisorLoading } = useStudentAdvisor();
-  const { data: requests = [], isLoading: requestsLoading } = useAdvisorRequests();
-  const { data: tasks = [], isLoading: tasksLoading } = useStudentTasksQuery();
-
-  const handleTaskStatusUpdate = (taskId: string, status: 'pending' | 'completed') => {
-    updateTaskStatus.mutate({ taskId, status });
+  const handleTaskStatusUpdate = async (taskId, status) => {
+    await updateTaskStatus(taskId, status);
   };
 
   const pendingTasks = tasks.filter(task => task.status === 'pending');
   const completedTasks = tasks.filter(task => task.status === 'completed');
-  const myRequests = requests.filter(req => req.status !== 'approved');
+  const myRequests = requests.filter(request => !request.advisor_id);
 
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-6xl mx-auto space-y-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">My Advisor</h1>
+          <h1 className="text-2xl font-bold tracking-tight">My Advisor</h1>
           <p className="text-muted-foreground">Track your tasks and communicate with your advisor</p>
         </div>
 
@@ -41,7 +36,7 @@ const StudentAdvisor = () => {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{pendingTasks.length}</div>
+              <div className="text-xl font-bold">{pendingTasks.length}</div>
             </CardContent>
           </Card>
           
@@ -51,7 +46,7 @@ const StudentAdvisor = () => {
               <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{completedTasks.length}</div>
+              <div className="text-xl font-bold">{completedTasks.length}</div>
             </CardContent>
           </Card>
           
@@ -61,7 +56,7 @@ const StudentAdvisor = () => {
               <User className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-lg font-bold">
+              <div className="text-base font-bold">
                 {advisor ? 'Assigned' : 'Not Assigned'}
               </div>
             </CardContent>
@@ -79,7 +74,7 @@ const StudentAdvisor = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <p className="text-lg font-semibold">{advisor.advisor?.full_name}</p>
+                <p className="text-base font-semibold">{advisor.advisor?.full_name}</p>
                 <p className="text-muted-foreground">{advisor.advisor?.email}</p>
                 <p className="text-sm text-muted-foreground">
                   Advisor since {format(new Date(advisor.created_at), 'MMM dd, yyyy')}
@@ -99,7 +94,7 @@ const StudentAdvisor = () => {
             <div className="space-y-6">
               {/* Pending Tasks */}
               <div>
-                <h2 className="text-xl font-semibold mb-4">Pending Tasks</h2>
+                <h2 className="text-lg font-semibold mb-4">Pending Tasks</h2>
                 <div className="grid gap-4">
                   {tasksLoading ? (
                     <p>Loading tasks...</p>
@@ -115,7 +110,7 @@ const StudentAdvisor = () => {
                         <CardHeader>
                           <div className="flex justify-between items-start">
                             <div>
-                              <CardTitle className="text-lg">{task.title}</CardTitle>
+                              <CardTitle className="text-base">{task.title}</CardTitle>
                               <CardDescription>
                                 From {task.advisor?.full_name}
                               </CardDescription>
@@ -147,14 +142,14 @@ const StudentAdvisor = () => {
               {/* Completed Tasks */}
               {completedTasks.length > 0 && (
                 <div>
-                  <h2 className="text-xl font-semibold mb-4">Completed Tasks</h2>
+                  <h2 className="text-lg font-semibold mb-4">Completed Tasks</h2>
                   <div className="grid gap-4">
                     {completedTasks.map((task) => (
                       <Card key={task.id}>
                         <CardHeader>
                           <div className="flex justify-between items-start">
                             <div>
-                              <CardTitle className="text-lg">{task.title}</CardTitle>
+                              <CardTitle className="text-base">{task.title}</CardTitle>
                               <CardDescription>
                                 From {task.advisor?.full_name}
                               </CardDescription>
@@ -189,7 +184,7 @@ const StudentAdvisor = () => {
           </TabsContent>
 
           <TabsContent value="requests" className="space-y-6">
-            <h2 className="text-xl font-semibold">My Advisor Requests</h2>
+            <h2 className="text-lg font-semibold">My Advisor Requests</h2>
             <div className="grid gap-4">
               {requestsLoading ? (
                 <p>Loading requests...</p>
@@ -205,7 +200,7 @@ const StudentAdvisor = () => {
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="text-lg">
+                          <CardTitle className="text-base">
                             Request to {request.advisor?.full_name}
                           </CardTitle>
                           <CardDescription>{request.advisor?.email}</CardDescription>

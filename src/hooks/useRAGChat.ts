@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -44,7 +43,8 @@ export const useRAGChat = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get response');
+        const errorBody = await response.json().catch(() => ({ error: 'Failed to parse error response from server.' }));
+        throw new Error(`Server returned an error: ${response.status} ${response.statusText}. ${errorBody.error || ''}`);
       }
 
       const data: RAGResponse = await response.json();

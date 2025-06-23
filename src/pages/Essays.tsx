@@ -16,6 +16,15 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useUserSchools } from "@/hooks/useSchools";
 import { Link } from "react-router-dom";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileText } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface Essay {
   id: string;
@@ -29,14 +38,14 @@ interface Essay {
   updated_at: string | null;
 }
 
-const statusColors = {
+const statusColors: { [key: string]: string } = {
   'drafting': 'bg-yellow-100 text-yellow-800',
-  'reviewing': 'bg-blue-100 text-blue-800',
+  'reviewing': 'bg-primary/20 text-primary',
   'complete': 'bg-green-100 text-green-800',
-  'submitted': 'bg-purple-100 text-purple-800'
+  'submitted': 'bg-emerald-100 text-emerald-800'
 };
 
-const statusIcons = {
+const statusIcons: { [key:string]: React.ElementType } = {
   'drafting': Clock,
   'reviewing': AlertCircle,
   'complete': CheckCircle,
@@ -80,19 +89,13 @@ const Essays = () => {
 
   // Group essays by school
   const essaysBySchool = essays.reduce((acc, essay) => {
-    if (!acc[essay.school_name]) {
-      acc[essay.school_name] = [];
+    const schoolName = essay.school_name;
+    if (!acc[schoolName]) {
+      acc[schoolName] = [];
     }
-    acc[essay.school_name].push(essay);
+    acc[schoolName].push(essay);
     return acc;
   }, {} as Record<string, Essay[]>);
-
-  // Combine user's school list with schools that already have essays
-  const allSchoolNames = Array.from(new Set([...userSchools.map(s => s.name), ...Object.keys(essaysBySchool)]));
-
-  // Filter to only show schools that are in the user's current school list
-  const userSchoolNames = userSchools.map(s => s.name);
-  const filteredSchoolNames = allSchoolNames.filter(schoolName => userSchoolNames.includes(schoolName));
 
   // Add essay mutation
   const addEssayMutation = useMutation({
@@ -115,11 +118,12 @@ const Essays = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['essays'] });
       setShowAddFormForSchool(null);
       setNewEssay({ prompt_name: '', word_limit: '', deadline: '' });
       toast.success('Essay added successfully!');
+      setEditingEssay(data); // Open new essay in editor
     },
     onError: (error) => {
       toast.error('Failed to add essay: ' + error.message);
@@ -139,9 +143,12 @@ const Essays = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['essays'] });
       toast.success('Essay updated successfully!');
+      if (editingEssay && data.id === editingEssay.id) {
+        setEditingEssay(data as Essay);
+      }
     },
     onError: (error) => {
       toast.error('Failed to update essay: ' + error.message);
@@ -187,6 +194,10 @@ const Essays = () => {
       updateEssayMutation.mutate({
         id: editingEssay.id,
         updates: { content: editorContent }
+      }, {
+        onSuccess: () => {
+          setEditingEssay(null);
+        }
       });
     }
   };
@@ -201,7 +212,7 @@ const Essays = () => {
 
   const getWordCount = (text: string | null) => {
     if (!text) return 0;
-    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    return text.trim().split(/\s+/).filter(Boolean).length;
   };
 
   const toggleSchoolExpansion = (schoolName: string) => {
@@ -214,6 +225,22 @@ const Essays = () => {
     setExpandedSchools(newExpanded);
   };
 
+  const handleBackToList = () => {
+    if (editorContent !== (editingEssay?.content || '')) {
+      if (confirm('You have unsaved changes. Are you sure you want to go back? Your changes will be lost.')) {
+        setEditingEssay(null);
+      }
+    } else {
+      setEditingEssay(null);
+    }
+  };
+
+  const handleDeleteEssay = () => {
+    if (editingEssay && confirm('Are you sure you want to delete this essay?')) {
+      deleteEssayMutation.mutate(editingEssay.id);
+    }
+  };
+
   const isLoading = isLoadingEssays || isLoadingSchools;
 
   if (isLoading) {
@@ -221,11 +248,12 @@ const Essays = () => {
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-7xl mx-auto">
           <div className="animate-pulse space-y-8">
-            <div className="h-8 bg-muted rounded w-1/4"></div>
+            <div className="h-10 bg-gray-200 rounded w-1/3"></div>
+            <div className="h-6 bg-gray-200 rounded w-1/2"></div>
             <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-16 bg-muted rounded"></div>
-              ))}
+              <div className="h-16 bg-gray-200 rounded"></div>
+              <div className="h-16 bg-gray-200 rounded"></div>
+              <div className="h-16 bg-gray-200 rounded"></div>
             </div>
           </div>
         </div>
@@ -233,277 +261,249 @@ const Essays = () => {
     );
   }
 
-  // Essay Editor View
+  // Main component render
   if (editingEssay) {
+    const Icon = statusIcons[editingEssay.status || 'drafting']
+    const wordCount = getWordCount(editorContent);
+    const wordLimit = editingEssay.word_limit || 0;
+    const progress = wordLimit > 0 ? (wordCount / wordLimit) * 100 : 0;
+    
     return (
-      <div className="min-h-screen bg-muted/50">
-        {/* Fixed AI Assistant - Only show on editor screen */}
-        <div 
-          className={cn(
-            "fixed right-0 top-0 bottom-0 z-30 hidden md:block transition-all duration-300",
-            isAiCollapsed ? "w-16" : "w-80 lg:w-96 xl:w-[400px]"
-          )}
-        >
-          <FloatingAIAssistant 
-            isCollapsed={isAiCollapsed}
-            onToggle={() => setIsAiCollapsed(!isAiCollapsed)}
-          />
-        </div>
-
-        <div 
-          className={cn(
-            "transition-all duration-300 p-8",
-            isAiCollapsed ? "pr-16" : "pr-0 md:pr-80 lg:pr-96 xl:pr-[400px]"
-          )}
-        >
-          <div className="max-w-4xl mx-auto">
-            {/* Header */}
-            <div className="space-y-4 mb-6">
-              <Button
-                variant="ghost"
-                onClick={() => setEditingEssay(null)}
-                className="flex items-center gap-2 self-start -ml-4"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Essays
+      <div className="min-h-screen bg-background">
+        <div className="p-8 max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <Button variant="ghost" onClick={handleBackToList}><ArrowLeft className="mr-2 h-4 w-4" /> Back to list</Button>
+            <div className="flex items-center space-x-2">
+              <Select onValueChange={handleUpdateStatus} value={editingEssay.status || ''}>
+                <SelectTrigger className="w-[180px]">
+                  <div className="flex items-center">
+                    <Icon className="mr-2 h-4 w-4" />
+                    <SelectValue placeholder="Set status" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(statusIcons).map(([status, Icon]) => (
+                    <SelectItem key={status} value={status}>
+                      <div className="flex items-center">
+                        <Icon className="mr-2 h-4 w-4" />
+                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button onClick={handleSaveEssay} disabled={updateEssayMutation.isPending}>
+                {updateEssayMutation.isPending ? 'Saving...' : 'Save Changes'}
               </Button>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-2xl font-bold text-foreground">{editingEssay.school_name}</h1>
-                  <p className="text-muted-foreground">{editingEssay.prompt_name}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Select
-                    value={editingEssay.status || 'drafting'}
-                    onValueChange={handleUpdateStatus}
-                  >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="drafting">Drafting</SelectItem>
-                      <SelectItem value="reviewing">Reviewing</SelectItem>
-                      <SelectItem value="complete">Complete</SelectItem>
-                      <SelectItem value="submitted">Submitted</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button onClick={handleSaveEssay} className="flex items-center gap-2">
-                    <Save className="h-4 w-4" />
-                    Save
-                  </Button>
-                </div>
+            </div>
+          </div>
+          
+          {/* Editor */}
+          <Card className="ultra-card">
+            <CardHeader>
+              <CardTitle className="text-xl">{editingEssay.school_name}</CardTitle>
+              <p className="text-muted-foreground">{editingEssay.prompt_name}</p>
+              <div className="flex items-center space-x-4 text-sm text-muted-foreground pt-2">
+                {editingEssay.deadline && (
+                  <div className="flex items-center"><CalendarIcon className="mr-2 h-4 w-4" /> {format(new Date(editingEssay.deadline), "PPP")}</div>
+                )}
+                {wordLimit > 0 && (
+                  <div className="flex items-center"><BookOpen className="mr-2 h-4 w-4" /> {wordLimit} words</div>
+                )}
               </div>
-            </div>
-
-            {/* Essay Info */}
-            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-              <span>
-                Words: {getWordCount(editorContent)}
-                {editingEssay.word_limit && ` / ${editingEssay.word_limit}`}
-              </span>
-              {editingEssay.deadline && (
-                <span className="flex items-center gap-1">
-                  <CalendarIcon className="h-4 w-4" />
-                  Due: {format(new Date(editingEssay.deadline), 'PPP')}
-                </span>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                className="w-full h-[60vh] text-base p-4 border rounded-md"
+                value={editorContent}
+                onChange={(e) => setEditorContent(e.target.value)}
+              />
+              <div className="text-right mt-2 text-sm text-muted-foreground">
+                Word Count: {wordCount} {wordLimit > 0 && `/ ${wordLimit}`}
+              </div>
+              {wordLimit > 0 && (
+                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                  <div className={cn("h-2.5 rounded-full", progress > 100 ? "bg-red-500" : "bg-primary")} style={{ width: `${Math.min(progress, 100)}%` }}></div>
+                </div>
               )}
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* Editor */}
-            <Textarea
-              value={editorContent}
-              onChange={(e) => setEditorContent(e.target.value)}
-              placeholder="Start writing your essay here..."
-              className="min-h-[600px] w-full rounded-lg border border-input bg-white p-6 text-base shadow-sm focus-visible:ring-2 focus-visible:ring-ring"
-            />
+          {/* Delete Button */}
+          <div className="mt-6 flex justify-end">
+            <Button variant="destructive" onClick={handleDeleteEssay} disabled={deleteEssayMutation.isPending}>
+              <Trash2 className="mr-2 h-4 w-4"/>
+              Delete Essay
+            </Button>
           </div>
         </div>
       </div>
     );
   }
 
-  // Main Essays Dashboard View
   return (
     <div className="min-h-screen bg-background">
-      {/* Main Content Area - No AI assistant on dashboard */}
-      <div className="p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Essays</h1>
-            <p className="text-muted-foreground">
-              Manage your college application essays and track your progress
-            </p>
+      {/* Fixed AI Assistant - Hidden on mobile, responsive width on larger screens */}
+      <div 
+        className={`fixed right-0 top-0 bottom-0 z-30 hidden md:block transition-all duration-300 p-4 ${
+          isAiCollapsed ? "w-24" : "w-80 lg:w-96 xl:w-[400px]"
+        }`}
+      >
+        <FloatingAIAssistant 
+          isCollapsed={isAiCollapsed} 
+          onToggle={() => setIsAiCollapsed(!isAiCollapsed)} 
+        />
+      </div>
+      
+      <div 
+        className={`transition-all duration-300 p-8 ${
+          isAiCollapsed ? "pr-16" : "pr-0 md:pr-80 lg:pr-96 xl:pr-[400px]"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-medium text-foreground tracking-tight">Essay Management</h1>
+              <p className="text-base text-muted-foreground">Track and organize your application essays.</p>
+            </div>
+            <div>
+              {/* Optional: Add a global "Add Essay" button here if needed */}
+            </div>
           </div>
 
-          <div className="space-y-6">
-            {/* Schools List */}
-            {filteredSchoolNames.length > 0 ? (
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold">Schools</h2>
-                <div className="space-y-2">
-                  {filteredSchoolNames.map((school) => {
-                    const schoolEssays = essaysBySchool[school] || [];
-                    const isExpanded = expandedSchools.has(school);
-                    
-                    return (
-                      <div key={school} className="space-y-2">
-                        {/* School Bar */}
-                        <Card 
-                          className="cursor-pointer hover:bg-muted/50 transition-all duration-200"
-                          onClick={() => toggleSchoolExpansion(school)}
-                        >
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                {isExpanded ? (
-                                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                                ) : (
-                                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                                )}
-                                <div>
-                                  <h3 className="font-medium text-lg">{school}</h3>
-                                  <p className="text-sm text-muted-foreground">
-                                    {schoolEssays.length} essay{schoolEssays.length !== 1 ? 's' : ''} required
-                                  </p>
-                                </div>
-                              </div>
-                              <Badge variant="secondary" className="text-sm">
-                                {schoolEssays.length} Essays
-                              </Badge>
-                            </div>
-                          </CardContent>
-                        </Card>
+          {/* School List and Essays */}
+          {!isLoading && userSchools.length === 0 && (
+            <Card className="ultra-card text-center py-12">
+              <CardContent>
+                <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium">No Schools Found</h3>
+                <p className="text-sm text-muted-foreground mb-4">You need to add schools to your list before you can manage essays.</p>
+                <Link to="/schools">
+                  <Button>Go to My School List</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          )}
+          
+          {!isLoading && userSchools.length > 0 && (
+            <Accordion type="multiple" className="w-full space-y-4">
+              {userSchools.map(school => {
+                const essayCount = (essaysBySchool[school.name] || []).length;
+                const hasEssays = essayCount > 0;
 
-                        {/* Essays Dropdown */}
-                        {isExpanded && (
-                          <div className="ml-8 space-y-2 animate-in slide-in-from-top-2 duration-200">
-                            {schoolEssays.map((essay) => {
-                              const StatusIcon = statusIcons[essay.status as keyof typeof statusIcons] || Clock;
+                return (
+                  <AccordionItem value={school.id} key={school.id} className="border rounded-lg ultra-card overflow-hidden bg-background">
+                    <AccordionTrigger className="flex w-full items-center justify-between p-4 hover:no-underline hover:bg-muted/50 transition-colors [&[data-state=open]>div>button]:bg-secondary">
+                      <div className="flex items-center gap-4">
+                        <h3 className="text-lg font-medium text-foreground">{school.name}</h3>
+                        <Badge variant={hasEssays ? "default" : "secondary"} className="h-6">
+                          {essayCount} {essayCount === 1 ? 'Essay' : 'Essays'}
+                        </Badge>
+                        <Button variant="outline" size="icon" className="h-6 w-6 rounded-full">
+                          <PlusIcon className="h-4 w-4" />
+                          <span className="sr-only">Add deadline</span>
+                        </Button>
+                      </div>
+                      
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="p-4 md:p-6 space-y-4 border-t">
+                         <div className="flex justify-end">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setShowAddFormForSchool(showAddFormForSchool === school.name ? null : school.name)}
+                          >
+                            <PlusIcon className="mr-2 h-4 w-4" /> Add Essay
+                          </Button>
+                        </div>
+
+                        {showAddFormForSchool === school.name && (
+                          <div className="p-4 border rounded-lg bg-muted/20 space-y-4">
+                            <h4 className="font-medium">Add New Essay for {school.name}</h4>
+                            <div className="space-y-2">
+                              <Label htmlFor="prompt_name">Essay Prompt</Label>
+                              <Input
+                                id="prompt_name"
+                                placeholder="e.g., Why our school?"
+                                value={newEssay.prompt_name}
+                                onChange={e => setNewEssay({ ...newEssay, prompt_name: e.target.value })}
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="word_limit">Word Limit</Label>
+                                <Input
+                                  id="word_limit"
+                                  type="number"
+                                  placeholder="e.g., 650"
+                                  value={newEssay.word_limit}
+                                  onChange={e => setNewEssay({ ...newEssay, word_limit: e.target.value })}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="deadline">Deadline (Optional)</Label>
+                                <Input
+                                  id="deadline"
+                                  type="date"
+                                  value={newEssay.deadline}
+                                  onChange={e => setNewEssay({ ...newEssay, deadline: e.target.value })}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex justify-end space-x-2">
+                              <Button variant="ghost" onClick={() => setShowAddFormForSchool(null)}>Cancel</Button>
+                              <Button onClick={() => handleAddEssay(school.name)} disabled={addEssayMutation.isPending}>
+                                {addEssayMutation.isPending ? 'Adding...' : 'Add and Edit'}
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+
+                        {hasEssays ? (
+                          <div className="space-y-3">
+                            {(essaysBySchool[school.name] || []).map(essay => {
                               const wordCount = getWordCount(essay.content);
-                              
+                              const wordLimit = essay.word_limit || 0;
+                              const Icon = statusIcons[essay.status || 'drafting'];
+
                               return (
-                                <Card key={essay.id} className="border-l-4 border-l-primary/20">
-                                  <CardContent className="p-4">
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex-1">
-                                        <h4 className="font-medium text-sm mb-1">{essay.prompt_name}</h4>
-                                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                          <span>
-                                            {wordCount} {essay.word_limit && `/ ${essay.word_limit}`} words
-                                          </span>
-                                          {essay.deadline && (
-                                            <span className="flex items-center gap-1">
-                                              <CalendarIcon className="h-3 w-3" />
-                                              {format(new Date(essay.deadline), 'MMM dd')}
-                                            </span>
-                                          )}
-                                        </div>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <Badge className={`text-xs ${statusColors[essay.status as keyof typeof statusColors]}`}>
-                                          <StatusIcon className="h-3 w-3 mr-1" />
-                                          {essay.status}
-                                        </Badge>
-                                        <Button
-                                          size="sm"
-                                          variant="outline"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditingEssay(essay);
-                                          }}
-                                          className="flex items-center gap-1"
-                                        >
-                                          <Edit className="h-3 w-3" />
-                                          Edit
-                                        </Button>
-                                      </div>
+                                <Card 
+                                  key={essay.id}
+                                  className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors cursor-pointer"
+                                  onClick={() => setEditingEssay(essay)}
+                                >
+                                  <div className="flex-1">
+                                    <p className="font-medium">{essay.prompt_name}</p>
+                                    <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-1">
+                                      {essay.deadline && <span className="flex items-center"><CalendarIcon className="mr-1.5 h-3 w-3"/>{format(new Date(essay.deadline), "MMM d")}</span>}
+                                      <span>{wordCount} / {wordLimit} words</span>
                                     </div>
-                                  </CardContent>
+                                  </div>
+                                  <Badge className={cn("ml-4", statusColors[essay.status || 'drafting'])}>
+                                    <Icon className="mr-1.5 h-3 w-3"/>
+                                    {essay.status}
+                                  </Badge>
                                 </Card>
                               );
                             })}
-
-                            {/* Add Essay Form within school section */}
-                            {showAddFormForSchool === school ? (
-                              <Card>
-                                <CardHeader>
-                                  <CardTitle className="text-sm">Add New Essay for {school}</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                  <div>
-                                    <Label htmlFor="prompt_name">Essay Prompt *</Label>
-                                    <Input
-                                      id="prompt_name"
-                                      value={newEssay.prompt_name}
-                                      onChange={(e) => setNewEssay({ ...newEssay, prompt_name: e.target.value })}
-                                      placeholder="e.g., Personal Statement"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="word_limit">Word Limit</Label>
-                                    <Input
-                                      id="word_limit"
-                                      type="number"
-                                      value={newEssay.word_limit}
-                                      onChange={(e) => setNewEssay({ ...newEssay, word_limit: e.target.value })}
-                                      placeholder="e.g., 650"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="deadline">Deadline</Label>
-                                    <Input
-                                      id="deadline"
-                                      type="date"
-                                      value={newEssay.deadline}
-                                      onChange={(e) => setNewEssay({ ...newEssay, deadline: e.target.value })}
-                                    />
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <Button onClick={() => handleAddEssay(school)} disabled={addEssayMutation.isPending}>
-                                      Add Essay
-                                    </Button>
-                                    <Button
-                                      variant="outline"
-                                      onClick={() => setShowAddFormForSchool(null)}
-                                    >
-                                      Cancel
-                                    </Button>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            ) : (
-                              <Button
-                                onClick={() => setShowAddFormForSchool(school)}
-                                size="sm"
-                                variant="ghost"
-                                className="flex items-center gap-2"
-                              >
-                                <PlusIcon className="h-4 w-4" />
-                                Add Essay Prompt
-                              </Button>
-                            )}
                           </div>
+                        ) : (
+                          showAddFormForSchool !== school.name && (
+                            <div className="text-center text-muted-foreground py-6">
+                              <p>No essays for this school yet.</p>
+                            </div>
+                          )
                         )}
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Your school list is empty</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Add schools to your list to start managing essays.
-                  </p>
-                  <Link to="/schools">
-                    <Button>Go to School List</Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
+          )}
         </div>
       </div>
     </div>

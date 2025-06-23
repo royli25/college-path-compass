@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, CheckCircle, Target, FileText, Calendar } from "lucide-react";
+import { GraduationCap, CheckCircle, Target, FileText, Calendar, ArrowRight, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 const Welcome = () => {
   const features = [{
@@ -25,23 +25,22 @@ const Welcome = () => {
       <div className="container mx-auto px-4 py-20">
         <div className="text-center max-w-4xl mx-auto mb-16">
           <div className="flex justify-center mb-6">
-            <div className="p-4 bg-primary/10 rounded-full">
-              <GraduationCap className="h-16 w-16 text-primary" />
-            </div>
+            <img src="/myblueprint.png" alt="MyBlueprint Logo" className="h-24 w-auto block dark:hidden" />
+            <img src="/myblueprint_dark.png" alt="MyBlueprint Logo" className="h-24 w-auto hidden dark:block" />
           </div>
-          <h1 className="text-5xl font-bold text-foreground mb-6">
-            Welcome to <span className="text-primary">MyBlueprint</span>
+          <h1 className="text-4xl font-bold text-foreground mb-6">
+            Welcome
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+          <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
             Your all-in-one companion for college applications. Streamline your journey 
             from dream schools to acceptance letters with organized tools designed for 
             high school students.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-lg px-8 py-6" asChild>
+            <Button size="lg" className="text-base px-8 py-6" asChild>
               <Link to="/auth">Get Started</Link>
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-6" asChild>
+            <Button variant="outline" size="lg" className="text-base px-8 py-6" asChild>
               <Link to="/dashboard">View Demo</Link>
             </Button>
           </div>

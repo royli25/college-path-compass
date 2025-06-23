@@ -8,25 +8,22 @@ interface ProfileCompletionAlertProps {
 }
 
 const ProfileCompletionAlert = ({ completionPercentage }: ProfileCompletionAlertProps) => {
-  if (completionPercentage > 80) return null;
+  if (completionPercentage >= 100) return null;
 
   return (
-    <Alert className="border-red-400 bg-red-100 text-red-900 mb-6 backdrop-blur-md">
-      <AlertCircle className="h-4 w-4" />
-      <AlertTitle>Complete Your Profile</AlertTitle>
-      <AlertDescription className="mt-2">
-        <div className="flex items-end justify-between">
-          <div>
-            <p>Your profile is {completionPercentage}% complete. Complete your profile to get accurate strength ratings and better school recommendations.</p>
-          </div>
-          <Link to="/profile">
-            <Button variant="outline" size="sm" className="ml-4">
-              Complete Profile
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </Link>
-        </div>
-      </AlertDescription>
+    <Alert className="flex items-center justify-between p-3">
+      <div className="flex items-center">
+        <AlertCircle className="h-4 w-4 mr-2" />
+        <span className="text-sm font-medium">
+          Your profile is {completionPercentage}% complete. Finish it for better recommendations.
+        </span>
+      </div>
+      <Link to="/profile/edit/0">
+        <Button variant="secondary" size="sm">
+          Complete Profile
+          <ArrowRight className="h-4 w-4 ml-2" />
+        </Button>
+      </Link>
     </Alert>
   );
 };

@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
@@ -29,8 +28,18 @@ async function generateEmbedding(text: string) {
       encoding_format: 'float',
     }),
   });
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('OpenAI Embedding API Error:', { status: response.status, body: errorData });
+    throw new Error('Failed to generate embedding from OpenAI.');
+  }
 
   const data = await response.json();
+  if (!data.data || !data.data[0] || !data.data[0].embedding) {
+    console.error('Invalid data structure from OpenAI Embedding API:', data);
+    throw new Error('Unexpected response structure from OpenAI Embedding API.');
+  }
   return data.data[0].embedding;
 }
 
@@ -95,7 +104,7 @@ serve(async (req) => {
 
     // Get auth token from headers
     const authToken = req.headers.get('authorization')?.replace('Bearer ', '');
-    let userContext = null;
+    let userContext: any = null;
 
     if (authToken) {
       try {
@@ -163,7 +172,17 @@ ${userContext.schools.map(school => `- ${school.name} (Status: ${school.status},
       }),
     });
 
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('OpenAI Chat API Error:', { status: response.status, body: errorData });
+      throw new Error('Failed to get chat completion from OpenAI.');
+    }
+
     const data = await response.json();
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('Invalid data structure from OpenAI Chat API:', data);
+      throw new Error('Unexpected response structure from OpenAI Chat API.');
+    }
     const aiResponse = data.choices[0].message.content;
 
     return new Response(

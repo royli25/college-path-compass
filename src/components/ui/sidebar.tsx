@@ -551,40 +551,42 @@ const SidebarMenuButton = React.forwardRef<
     },
     ref
   ) => {
+    const { state } = useSidebar()
     const Comp = asChild ? Slot : "button"
-    const { isMobile, state } = useSidebar()
 
-    const button = (
-      <Comp
-        ref={ref}
-        data-sidebar="menu-button"
-        data-size={size}
-        data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
-        {...props}
-      />
-    )
-
-    if (!tooltip) {
-      return button
-    }
-
-    if (typeof tooltip === "string") {
-      tooltip = {
-        children: tooltip,
-      }
+    if (state === "collapsed") {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Comp
+              ref={ref}
+              data-active={isActive}
+              className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8",
+                isActive && "bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100",
+                className
+              )}
+              {...props}
+            />
+          </TooltipTrigger>
+          <TooltipContent side="right" />
+        </Tooltip>
+      )
     }
 
     return (
-      <Tooltip>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
-        <TooltipContent
-          side="right"
-          align="center"
-          hidden={state !== "collapsed" || isMobile}
-          {...tooltip}
-        />
-      </Tooltip>
+      <Comp
+        ref={ref}
+        data-active={isActive}
+        className={cn(
+          "flex w-full items-center justify-start rounded-md p-2 text-sm text-sidebar-foreground transition-colors duration-100 ease-in-out hover:bg-secondary/50",
+          isActive
+            ? "bg-gray-200 text-gray-900 font-medium dark:bg-gray-700 dark:text-gray-100"
+            : "hover:bg-secondary/80",
+          className
+        )}
+        {...props}
+      />
     )
   }
 )

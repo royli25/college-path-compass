@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
@@ -11,7 +10,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     proxy: {
       '/functions/v1': {
-        target: 'https://mknqrapsxcylikcljisu.supabase.co',
+        target: 'http://127.0.0.1:54321',
         changeOrigin: true,
       },
     }

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
@@ -64,10 +63,10 @@ const ProfileEdit = () => {
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-4xl font-medium text-foreground tracking-tight">
+          <h1 className="text-3xl font-medium text-foreground tracking-tight">
             Profile Builder
           </h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}
           </p>
         </div>

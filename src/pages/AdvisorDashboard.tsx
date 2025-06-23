@@ -7,10 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Users, CheckCircle, Clock, Plus, Search, UserPlus, MessageSquare } from "lucide-react";
+import { Calendar, Users, CheckCircle, Clock, Plus, Search, UserPlus, MessageSquare, ListTodo } from "lucide-react";
 import { useAdvisor } from "@/hooks/useAdvisor";
 import { useAdvisorTasks } from "@/hooks/useAdvisorTasks";
 import { format } from "date-fns";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const AdvisorDashboard = () => {
   const { useAdvisorStudents, useAdvisorRequests, respondToRequest, useSearchStudents, sendConnectionRequest } = useAdvisor();
@@ -67,29 +68,31 @@ const AdvisorDashboard = () => {
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Advisor Dashboard</h1>
-          <p className="text-muted-foreground">Manage your students and track their progress</p>
+          <h1 className="text-2xl font-bold tracking-tight">Advisor Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome back! Here's an overview of your students and tasks.
+          </p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Students</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{students.length}</div>
+              <div className="text-xl font-bold">{students.length}</div>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
+              <UserPlus className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{pendingRequests.length}</div>
+              <div className="text-xl font-bold">{pendingRequests.length}</div>
             </CardContent>
           </Card>
           
@@ -99,17 +102,17 @@ const AdvisorDashboard = () => {
               <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{completedTasks}</div>
+              <div className="text-xl font-bold">{completedTasks}</div>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Pending Tasks</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <ListTodo className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{pendingTasks}</div>
+              <div className="text-xl font-bold">{pendingTasks}</div>
             </CardContent>
           </Card>
         </div>

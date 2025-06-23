@@ -41,6 +41,10 @@ const SchoolResearch = () => {
     );
   }
 
+  if (!school) {
+    return <div className="p-8">School not found.</div>;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Fixed AI Assistant */}
@@ -73,19 +77,20 @@ const SchoolResearch = () => {
               </Button>
             </Link>
             
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <FileText className="h-6 w-6 text-blue-600" />
+            <div className="flex items-center space-x-4 p-4 rounded-xl bg-card border">
+              {/* Icon */}
+              <div className="p-2 bg-primary/20 rounded-lg">
+                <FileText className="h-6 w-6 text-primary" />
               </div>
+              {/* Content */}
               <div>
                 <h1 className="text-2xl font-bold text-foreground">
                   Research Document
                 </h1>
-                {school && (
-                  <p className="text-muted-foreground">
-                    {school.name}
-                  </p>
-                )}
+                <h2 className="text-xl font-bold text-foreground">
+                  {school.name}
+                </h2>
+                <p className="text-sm text-muted-foreground">{school.location}</p>
               </div>
             </div>
           </div>
