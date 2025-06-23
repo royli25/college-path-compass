@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Checkbox } from "./ui/checkbox";
@@ -23,6 +22,7 @@ const ToDoLog = () => {
   const [weeklyGoal, setWeeklyGoal] = useState("");
   const [individualTasks, setIndividualTasks] = useState<string[]>([""]);
   const [editWeekIndex, setEditWeekIndex] = useState<number | null>(null);
+  const [editWeekStartDate, setEditWeekStartDate] = useState<string | null>(null);
   
   const { 
     currentWeekTasks, 
@@ -68,24 +68,22 @@ const ToDoLog = () => {
   const currentWeekStart = getWeekStartDate(today);
   const weekLabel = getWeekLabelRange(currentWeekStart);
 
-  // For "Plan Next Week" card
-  const nextWeek = new Date();
-  nextWeek.setDate(today.getDate() + 7);
-  const nextWeekStart = getWeekStartDate(nextWeek);
-  const nextWeekLabel = getWeekLabelRange(nextWeekStart);
-
   // Open dialog for editing a week
-  const openEditDialog = (weekIdx: number | null) => {
+  const openEditDialog = (weekIdx: number | null, weekStartDate?: string) => {
     setEditWeekIndex(weekIdx);
+    setEditWeekStartDate(weekStartDate || null);
+    
     if (weekIdx === 0) {
       // Editing current week
       setWeeklyGoal(currentWeekTasks?.week_goal || "");
-      setIndividualTasks(currentWeekTasks?.tasks || [""]);
-    } else if (weekIdx != null && plannedWeeks[weekIdx - 1]) {
+      setIndividualTasks(currentWeekTasks?.tasks && currentWeekTasks.tasks.length > 0 ? currentWeekTasks.tasks : [""]);
+    } else if (weekIdx != null && weekIdx > 0 && plannedWeeks[weekIdx - 1]) {
+      // Editing existing planned week
       const week = plannedWeeks[weekIdx - 1];
       setWeeklyGoal(week.week_goal || "");
-      setIndividualTasks(week.tasks?.length ? week.tasks : [""]);
+      setIndividualTasks(week.tasks && week.tasks.length > 0 ? week.tasks : [""]);
     } else {
+      // Planning new week (weekIdx is null)
       setWeeklyGoal("");
       setIndividualTasks([""]);
     }
@@ -97,22 +95,44 @@ const ToDoLog = () => {
     const tasks = individualTasks.filter(task => task.trim() !== "");
     
     try {
+      let weekStartString: string;
+      
       if (editWeekIndex === 0) {
         // Save current week
-        const weekStartString = currentWeekStart.toISOString().split('T')[0];
+        weekStartString = currentWeekStart.toISOString().split('T')[0];
         await saveWeeklyTasks(weekStartString, weeklyGoal, tasks);
         toast.success("Current week updated successfully!");
-      } else {
-        // Save planned week (next week or new week)
-        const weekStartString = nextWeekStart.toISOString().split('T')[0];
+      } else if (editWeekIndex != null && editWeekIndex > 0) {
+        // Save existing planned week
+        weekStartString = editWeekStartDate!;
         await saveWeeklyTasks(weekStartString, weeklyGoal, tasks);
-        toast.success("Week planned successfully!");
+        toast.success("Week updated successfully!");
+      } else {
+        // Save new planned week - calculate the next available week
+        let nextWeekStart: Date;
+        
+        if (plannedWeeks.length === 0) {
+          // No planned weeks yet, use next week
+          nextWeekStart = new Date(today);
+          nextWeekStart.setDate(today.getDate() + 7);
+          nextWeekStart = getWeekStartDate(nextWeekStart);
+        } else {
+          // Find the latest planned week and add one more week
+          const latestPlannedWeek = plannedWeeks[plannedWeeks.length - 1];
+          nextWeekStart = new Date(latestPlannedWeek.week_start_date);
+          nextWeekStart.setDate(nextWeekStart.getDate() + 7);
+        }
+        
+        weekStartString = nextWeekStart.toISOString().split('T')[0];
+        await saveWeeklyTasks(weekStartString, weeklyGoal, tasks);
+        toast.success("New week planned successfully!");
       }
       
       setIsDialogOpen(false);
       setWeeklyGoal("");
       setIndividualTasks([""]);
       setEditWeekIndex(null);
+      setEditWeekStartDate(null);
     } catch (error) {
       console.error('Error saving weekly tasks:', error);
       toast.error("Failed to save weekly tasks. Please try again.");
@@ -182,7 +202,7 @@ const ToDoLog = () => {
               <Card key={week.id} className="h-80 flex flex-col p-4 relative">
                 <button
                   className="absolute top-2 right-2 p-1 rounded hover:bg-muted"
-                  onClick={() => openEditDialog(idx + 1)}
+                  onClick={() => openEditDialog(idx + 1, week.week_start_date)}
                   aria-label="Edit week"
                 >
                   <Pencil className="h-4 w-4 text-muted-foreground" />
@@ -207,13 +227,6 @@ const ToDoLog = () => {
             className="h-80 flex flex-col items-center justify-center cursor-pointer hover:bg-muted relative"
             onClick={() => openEditDialog(null)}
           >
-            <button
-              className="absolute top-2 right-2 p-1 rounded hover:bg-muted"
-              onClick={e => { e.stopPropagation(); openEditDialog(null); }}
-              aria-label="Edit week"
-            >
-              <Pencil className="h-4 w-4 text-muted-foreground" />
-            </button>
             <div className="text-center text-muted-foreground">
               <Plus className="mx-auto h-8 w-8" />
               <p>Plan Next Week</p>
