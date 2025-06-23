@@ -17,13 +17,6 @@ interface ToDo {
   completed: boolean;
 }
 
-interface PlannedWeek {
-  weekLabel: string;
-  goal: string;
-  tasks: string[];
-  weekStartDate: string;
-}
-
 const ToDoLog = () => {
   const [todos, setTodos] = useState<ToDo[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -160,7 +153,7 @@ const ToDoLog = () => {
               <Pencil className="h-4 w-4 text-muted-foreground" />
             </button>
             <div className="font-semibold mb-2">{weekLabel}</div>
-            {currentWeekTasks?.week_goal || currentWeekTasks?.tasks?.length ? (
+            {currentWeekTasks?.week_goal || (currentWeekTasks?.tasks && currentWeekTasks.tasks.length > 0) ? (
               <>
                 {currentWeekTasks.week_goal && (
                   <div className="mb-2 text-muted-foreground">{currentWeekTasks.week_goal}</div>

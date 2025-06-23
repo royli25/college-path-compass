@@ -26,6 +26,14 @@ export const useWeeklyTasks = () => {
     return new Date(d.setDate(diff));
   };
 
+  // Helper function to safely convert Json to string array
+  const jsonToStringArray = (json: any): string[] => {
+    if (Array.isArray(json)) {
+      return json.filter(item => typeof item === 'string');
+    }
+    return [];
+  };
+
   // Get current week's tasks
   const { data: currentWeekTasks, isLoading } = useQuery({
     queryKey: ['weeklyTasks', user?.id],
@@ -43,7 +51,15 @@ export const useWeeklyTasks = () => {
         .maybeSingle();
 
       if (error) throw error;
-      return data;
+      
+      if (data) {
+        return {
+          ...data,
+          tasks: jsonToStringArray(data.tasks)
+        } as WeeklyTask;
+      }
+      
+      return null;
     },
     enabled: !!user?.id,
   });
@@ -67,7 +83,11 @@ export const useWeeklyTasks = () => {
         .order('week_start_date', { ascending: true });
 
       if (error) throw error;
-      return data || [];
+      
+      return (data || []).map(item => ({
+        ...item,
+        tasks: jsonToStringArray(item.tasks)
+      })) as WeeklyTask[];
     },
     enabled: !!user?.id,
   });
@@ -90,7 +110,11 @@ export const useWeeklyTasks = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      
+      return {
+        ...data,
+        tasks: jsonToStringArray(data.tasks)
+      } as WeeklyTask;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['weeklyTasks', user?.id] });

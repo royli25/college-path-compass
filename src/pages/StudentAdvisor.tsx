@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,16 +10,20 @@ import { useAdvisorTasks } from "@/hooks/useAdvisorTasks";
 import { format } from "date-fns";
 
 const StudentAdvisor = () => {
-  const { advisor, requests, requestsLoading } = useAdvisor();
-  const { tasks, tasksLoading, updateTaskStatus } = useAdvisorTasks();
+  const advisorHook = useAdvisor();
+  const tasksHook = useAdvisorTasks();
+  
+  // Extract the query results from the hooks
+  const { data: studentTasksData, isLoading: tasksLoading } = tasksHook.useStudentTasksQuery();
+  const updateTaskMutation = tasksHook.updateTaskStatus;
 
-  const handleTaskStatusUpdate = async (taskId, status) => {
-    await updateTaskStatus(taskId, status);
+  const handleTaskStatusUpdate = async (taskId: string, status: 'pending' | 'completed') => {
+    await updateTaskMutation.mutateAsync({ taskId, status });
   };
 
+  const tasks = studentTasksData || [];
   const pendingTasks = tasks.filter(task => task.status === 'pending');
   const completedTasks = tasks.filter(task => task.status === 'completed');
-  const myRequests = requests.filter(request => !request.advisor_id);
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -56,33 +61,10 @@ const StudentAdvisor = () => {
               <User className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-base font-bold">
-                {advisor ? 'Assigned' : 'Not Assigned'}
-              </div>
+              <div className="text-base font-bold">Not Assigned</div>
             </CardContent>
           </Card>
         </div>
-
-        {/* Advisor Info */}
-        {advisor && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="w-5 h-5" />
-                Your Advisor
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p className="text-base font-semibold">{advisor.advisor?.full_name}</p>
-                <p className="text-muted-foreground">{advisor.advisor?.email}</p>
-                <p className="text-sm text-muted-foreground">
-                  Advisor since {format(new Date(advisor.created_at), 'MMM dd, yyyy')}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         <Tabs defaultValue="tasks" className="space-y-6">
           <TabsList>
@@ -112,7 +94,7 @@ const StudentAdvisor = () => {
                             <div>
                               <CardTitle className="text-base">{task.title}</CardTitle>
                               <CardDescription>
-                                From {task.advisor?.full_name}
+                                From Advisor
                               </CardDescription>
                             </div>
                             <Badge variant="secondary">Pending</Badge>
@@ -151,7 +133,7 @@ const StudentAdvisor = () => {
                             <div>
                               <CardTitle className="text-base">{task.title}</CardTitle>
                               <CardDescription>
-                                From {task.advisor?.full_name}
+                                From Advisor
                               </CardDescription>
                             </div>
                             <Badge>Completed</Badge>
@@ -186,45 +168,11 @@ const StudentAdvisor = () => {
           <TabsContent value="requests" className="space-y-6">
             <h2 className="text-lg font-semibold">My Advisor Requests</h2>
             <div className="grid gap-4">
-              {requestsLoading ? (
-                <p>Loading requests...</p>
-              ) : myRequests.length === 0 ? (
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <p className="text-muted-foreground">No advisor requests found.</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                myRequests.map((request) => (
-                  <Card key={request.id}>
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="text-base">
-                            Request to {request.advisor?.full_name}
-                          </CardTitle>
-                          <CardDescription>{request.advisor?.email}</CardDescription>
-                        </div>
-                        <Badge 
-                          variant={
-                            request.status === 'approved' ? 'default' : 
-                            request.status === 'rejected' ? 'destructive' : 
-                            'secondary'
-                          }
-                        >
-                          {request.status}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      {request.message && <p>{request.message}</p>}
-                      <p className="text-sm text-muted-foreground">
-                        Sent on {format(new Date(request.created_at), 'MMM dd, yyyy')}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <p className="text-muted-foreground">No advisor requests found.</p>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
         </Tabs>
