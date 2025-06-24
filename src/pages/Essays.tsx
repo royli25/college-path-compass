@@ -401,18 +401,43 @@ const Essays = () => {
                         <Badge variant={hasEssays ? "default" : "secondary"} className="h-6">
                           {essayCount} {essayCount === 1 ? 'Essay' : 'Essays'}
                         </Badge>
-                        <Button variant="outline" size="icon" className="h-6 w-6 rounded-full">
-                          <PlusIcon className="h-4 w-4" />
-                          <span className="sr-only">Add deadline</span>
-                        </Button>
                       </div>
-                      
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="p-4 md:p-6 space-y-4 border-t">
-                         <div className="flex justify-end">
+                        {hasEssays && (
+                          <div className="space-y-3">
+                            {(essaysBySchool[school.name] || []).map(essay => {
+                              const wordCount = getWordCount(essay.content);
+                              const wordLimit = essay.word_limit || 0;
+                              const Icon = statusIcons[essay.status || 'drafting'];
+
+                              return (
+                                <Card 
+                                  key={essay.id}
+                                  className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors cursor-pointer"
+                                  onClick={() => setEditingEssay(essay)}
+                                >
+                                  <div className="flex-1">
+                                    <p className="font-medium">{essay.prompt_name}</p>
+                                    <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-1">
+                                      {essay.deadline && <span className="flex items-center"><CalendarIcon className="mr-1.5 h-3 w-3"/>{format(new Date(essay.deadline), "MMM d")}</span>}
+                                      <span>{wordCount} / {wordLimit} words</span>
+                                    </div>
+                                  </div>
+                                  <Badge className={cn("ml-4", statusColors[essay.status || 'drafting'])}>
+                                    <Icon className="mr-1.5 h-3 w-3"/>
+                                    {essay.status}
+                                  </Badge>
+                                </Card>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {/* Add Essay Button - Now positioned below essays */}
+                        <div className="flex justify-center pt-4">
                           <Button
-                            size="sm"
                             variant="outline"
                             onClick={() => setShowAddFormForSchool(showAddFormForSchool === school.name ? null : school.name)}
                           >
@@ -462,40 +487,10 @@ const Essays = () => {
                           </div>
                         )}
 
-                        {hasEssays ? (
-                          <div className="space-y-3">
-                            {(essaysBySchool[school.name] || []).map(essay => {
-                              const wordCount = getWordCount(essay.content);
-                              const wordLimit = essay.word_limit || 0;
-                              const Icon = statusIcons[essay.status || 'drafting'];
-
-                              return (
-                                <Card 
-                                  key={essay.id}
-                                  className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors cursor-pointer"
-                                  onClick={() => setEditingEssay(essay)}
-                                >
-                                  <div className="flex-1">
-                                    <p className="font-medium">{essay.prompt_name}</p>
-                                    <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-1">
-                                      {essay.deadline && <span className="flex items-center"><CalendarIcon className="mr-1.5 h-3 w-3"/>{format(new Date(essay.deadline), "MMM d")}</span>}
-                                      <span>{wordCount} / {wordLimit} words</span>
-                                    </div>
-                                  </div>
-                                  <Badge className={cn("ml-4", statusColors[essay.status || 'drafting'])}>
-                                    <Icon className="mr-1.5 h-3 w-3"/>
-                                    {essay.status}
-                                  </Badge>
-                                </Card>
-                              );
-                            })}
+                        {!hasEssays && showAddFormForSchool !== school.name && (
+                          <div className="text-center text-muted-foreground py-6">
+                            <p>No essays for this school yet.</p>
                           </div>
-                        ) : (
-                          showAddFormForSchool !== school.name && (
-                            <div className="text-center text-muted-foreground py-6">
-                              <p>No essays for this school yet.</p>
-                            </div>
-                          )
                         )}
                       </div>
                     </AccordionContent>
