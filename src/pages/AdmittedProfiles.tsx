@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,8 +41,8 @@ const AdmittedProfiles = () => {
         <div className="max-w-7xl mx-auto">
           <div className="animate-pulse space-y-8">
             <div className="h-8 bg-muted rounded w-1/4"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, i) => (
                 <div key={i} className="h-80 bg-muted rounded"></div>
               ))}
             </div>
@@ -90,97 +91,83 @@ const AdmittedProfiles = () => {
         </div>
       </div>
 
-      {/* Profiles Grid */}
+      {/* Profiles Grid - 4 cards per row */}
       {filteredProfiles.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredProfiles.map((profile) => (
             <Link key={profile.id} to={`/resources/admitted-profiles/${profile.id}`}>
               <Card className="h-full flex flex-col hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader className="pb-4 flex-grow">
-                  <div className="flex items-center gap-4 mb-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                <CardHeader className="pb-3 flex-shrink-0">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Avatar className="h-10 w-10 flex-shrink-0">
+                      <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
                         {profile.name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <CardTitle className="text-base font-semibold mb-0.5">{profile.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground">Class of {profile.graduation_year}</p>
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-sm font-semibold mb-0.5 truncate">{profile.name}</CardTitle>
+                      <p className="text-xs text-muted-foreground">Class of {profile.graduation_year}</p>
                     </div>
                   </div>
 
-                  {/* Badges Row */}
-                  <div className="flex items-center gap-3 mb-3">
+                  {/* Major and Essays */}
+                  <div className="flex items-center justify-between gap-2 mb-2">
                     {profile.intended_major && (
-                      <Badge variant="secondary" className="w-fit text-xs px-3 py-1">
+                      <Badge variant="secondary" className="text-xs px-2 py-0.5 truncate flex-1">
                         {profile.intended_major}
                       </Badge>
                     )}
                     <Badge 
                       variant={profile.essay_excerpts?.length ? "outline" : "secondary"} 
-                      className="flex items-center gap-1 text-xs px-3 py-1"
+                      className="flex items-center gap-1 text-xs px-2 py-0.5 flex-shrink-0"
                     >
                       <FileText className="h-3 w-3" />
-                      {profile.essay_excerpts?.length || 0} Essays
+                      {profile.essay_excerpts?.length || 0}
                     </Badge>
+                  </div>
+
+                  {/* Academic Stats */}
+                  <div className="flex items-center justify-between text-xs mb-3">
+                    <div className="flex items-center gap-1">
+                      <BookOpen className="h-3 w-3 text-muted-foreground" />
+                      <span>GPA: {profile.gpa_unweighted || 'N/A'}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Trophy className="h-3 w-3 text-muted-foreground" />
+                      <span>SAT: {profile.sat_score || 'N/A'}</span>
+                    </div>
                   </div>
                 </CardHeader>
 
-                <CardContent className="pt-0 flex flex-col flex-grow">
-                  <div className="flex flex-col flex-grow justify-between">
-                    {/* Academic Stats */}
-                    <div className="flex items-center gap-6 text-sm mb-3">
-                      <div className="flex items-center gap-1 min-w-[110px]">
-                        {profile.gpa_unweighted ? (
-                          <>
-                            <BookOpen className="h-3 w-3 text-muted-foreground" />
-                            <span>GPA: {profile.gpa_unweighted}</span>
-                          </>
-                        ) : (
-                          <span className="invisible">GPA: 0.00</span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1 min-w-[110px]">
-                        {profile.sat_score ? (
-                          <>
-                            <Trophy className="h-3 w-3 text-muted-foreground" />
-                            <span>SAT: {profile.sat_score}</span>
-                          </>
-                        ) : (
-                          <span className="invisible">SAT: 0000</span>
+                <CardContent className="pt-0 flex flex-col flex-1">
+                  {/* Colleges Admitted - Show up to 8 */}
+                  {profile.colleges_admitted && profile.colleges_admitted.length > 0 && (
+                    <div className="mb-3 flex-1">
+                      <p className="text-xs font-medium mb-2 flex items-center gap-1">
+                        <GraduationCap className="h-3 w-3" />
+                        Accepted to:
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {profile.colleges_admitted.slice(0, 8).map((college: any, index: number) => (
+                          <Badge key={index} variant="outline" className="text-xs px-2 py-0.5">
+                            {college.school || college}
+                          </Badge>
+                        ))}
+                        {profile.colleges_admitted.length > 8 && (
+                          <Badge variant="outline" className="text-xs px-2 py-0.5">
+                            +{profile.colleges_admitted.length - 8}
+                          </Badge>
                         )}
                       </div>
                     </div>
+                  )}
 
-                    {/* Colleges Admitted */}
-                    {profile.colleges_admitted && profile.colleges_admitted.length > 0 && (
-                      <div className="mb-2">
-                        <p className="text-sm font-medium mb-2 flex items-center gap-1">
-                          <GraduationCap className="h-4 w-4" />
-                          Accepted to:
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {profile.colleges_admitted.slice(0, 3).map((college: any, index: number) => (
-                            <Badge key={index} variant="outline" className="text-xs px-3 py-1">
-                              {college.school || college}
-                            </Badge>
-                          ))}
-                          {profile.colleges_admitted.length > 3 && (
-                            <Badge variant="outline" className="text-xs px-3 py-1">
-                              +{profile.colleges_admitted.length - 3} more
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Background Preview */}
-                    {profile.background_story && (
-                      <p className="text-sm text-muted-foreground line-clamp-2 mt-3">
-                        {profile.background_story}
-                      </p>
-                    )}
-                  </div>
+                  {/* Background Preview */}
+                  {profile.background_story && (
+                    <p className="text-xs text-muted-foreground line-clamp-2 mt-auto">
+                      {profile.background_story}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             </Link>
