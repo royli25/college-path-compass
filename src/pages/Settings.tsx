@@ -1,44 +1,18 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Bell, Shield, User, Palette, LogOut } from "lucide-react";
-import { useTheme } from "next-themes";
+import { Bell, Shield, User, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState, useEffect } from "react";
-import { useBeforeUnload } from "react-router-dom";
 
 const Settings = () => {
-  const { theme, setTheme } = useTheme();
   const { signOut } = useAuth();
-  
-  const [currentTheme, setCurrentTheme] = useState(theme);
-  const [isDirty, setIsDirty] = useState(false);
-
-  useEffect(() => {
-    setIsDirty(currentTheme !== theme);
-  }, [currentTheme, theme]);
-
-  useBeforeUnload(
-    (event) => {
-      if (isDirty) {
-        event.preventDefault();
-      }
-    },
-    { capture: true }
-  );
 
   const handleSignOut = async () => {
     await signOut();
-  };
-
-  const handleSave = () => {
-    if (currentTheme) {
-      setTheme(currentTheme);
-      setIsDirty(false);
-    }
   };
 
   return (
@@ -161,34 +135,6 @@ const Settings = () => {
           </CardContent>
         </Card>
 
-        {/* Appearance */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Palette className="h-5 w-5" />
-              Appearance
-            </CardTitle>
-            <CardDescription>
-              Customize the look and feel of your application
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="darkMode">Dark Mode</Label>
-                <p className="text-sm text-muted-foreground">
-                  Switch to dark theme
-                </p>
-              </div>
-              <Switch 
-                id="darkMode" 
-                checked={currentTheme === "dark"}
-                onCheckedChange={(checked) => setCurrentTheme(checked ? "dark" : "light")}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Account Actions */}
         <Card>
           <CardHeader>
@@ -216,13 +162,6 @@ const Settings = () => {
           </CardContent>
         </Card>
       </div>
-
-      {isDirty && (
-        <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 flex justify-end items-center shadow-lg">
-          <p className="text-sm text-muted-foreground mr-4">You have unsaved changes.</p>
-          <Button onClick={handleSave}>Save Changes</Button>
-        </div>
-      )}
     </div>
   );
 };
