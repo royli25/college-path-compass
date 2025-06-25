@@ -1,6 +1,6 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, Circle, ArrowRight } from "lucide-react";
@@ -74,80 +74,82 @@ const Profile = () => {
         <Separator />
 
         {/* Progress Overview */}
-        <Card className="ultra-card">
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-medium text-foreground">Overall Progress</h2>
-                <span className="text-xl font-semibold text-primary">{strength.overall}%</span>
-              </div>
-              <Progress value={strength.overall} className="h-3 rounded-full" />
-              <p className="text-sm text-muted-foreground">
-                Complete all sections to build a strong application profile
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-medium text-foreground">Overall Progress</h2>
+            <span className="text-xl font-semibold text-primary">{strength.overall}%</span>
+          </div>
+          <Progress value={strength.overall} className="h-3 rounded-full" />
+          <p className="text-sm text-muted-foreground">
+            Complete all sections to build a strong application profile
+          </p>
+        </div>
 
-        {/* Onboarding Steps */}
-        <div className="space-y-6">
+        <Separator />
+
+        {/* Onboarding Steps - Direct Content */}
+        <div className="space-y-12">
           {onboardingSteps.map((step, index) => {
             const isCompleted = getStepCompletion(profile, step.stepIndex);
             const isCurrent = index === currentStep;
             const isUpcoming = index > currentStep && !isCompleted;
 
             return (
-              <Card 
-                key={index} 
-                className={`ultra-card smooth-hover transition-all duration-300 ${
-                  isCurrent ? 'ring-2 ring-primary shadow-xl shadow-primary/10' : ''
-                }`}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
-                        isCompleted
-                          ? 'bg-green-500/20 text-green-400'
-                          : isCurrent
-                            ? 'bg-primary/20 text-primary'
-                            : 'bg-secondary text-secondary-foreground'
-                      }`}>
-                        {isCompleted ? (
-                          <CheckCircle className="h-5 w-5" />
-                        ) : (
-                          <span className="font-medium">{index + 1}</span>
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-medium text-foreground">{step.title}</h3>
-                        <p className="text-muted-foreground">{step.description}</p>
-                      </div>
+              <div key={index} className="space-y-6">
+                {/* Step Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors ${
+                      isCompleted
+                        ? 'bg-green-500/20 text-green-400'
+                        : isCurrent
+                          ? 'bg-primary/20 text-primary'
+                          : 'bg-secondary text-secondary-foreground'
+                    }`}>
+                      {isCompleted ? (
+                        <CheckCircle className="h-6 w-6" />
+                      ) : (
+                        <span className="font-semibold text-lg">{index + 1}</span>
+                      )}
                     </div>
-                    <Link to={`/profile/edit/${step.stepIndex}`} className="flex-shrink-0 ml-4">
-                      <Button
-                        variant={isCurrent ? "default" : isCompleted ? "outline" : "ghost"}
-                        className="rounded-xl"
-                        disabled={isUpcoming}
-                      >
-                        {isCompleted ? "Review" : isCurrent ? "Continue" : "Start"}
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Button>
-                    </Link>
+                    <div>
+                      <h3 className="text-2xl font-semibold text-foreground">{step.title}</h3>
+                      <p className="text-lg text-muted-foreground">{step.description}</p>
+                    </div>
                   </div>
-                  <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {step.fields.map((field, fieldIndex) => (
-                      <div
-                        key={fieldIndex}
-                        className="flex items-center space-x-2 text-sm"
-                      >
-                        <Circle className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-muted-foreground">{field}</span>
-                      </div>
-                    ))}
+                  <Link to={`/profile/edit/${step.stepIndex}`}>
+                    <Button
+                      variant={isCurrent ? "default" : isCompleted ? "outline" : "ghost"}
+                      className="rounded-xl"
+                      disabled={isUpcoming}
+                      size="lg"
+                    >
+                      {isCompleted ? "Review" : isCurrent ? "Continue" : "Start"}
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* Step Fields */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pl-16">
+                  {step.fields.map((field, fieldIndex) => (
+                    <div
+                      key={fieldIndex}
+                      className="flex items-center space-x-3"
+                    >
+                      <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span className="text-muted-foreground font-medium">{field}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Separator between steps (except last) */}
+                {index < onboardingSteps.length - 1 && (
+                  <div className="pt-6">
+                    <Separator />
                   </div>
-                </CardContent>
-              </Card>
+                )}
+              </div>
             );
           })}
         </div>
