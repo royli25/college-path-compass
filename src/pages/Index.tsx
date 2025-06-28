@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, CheckCircle, Target, FileText, Calendar, ArrowRight, ArrowUpRight } from "lucide-react";
@@ -29,7 +28,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-background">
       {/* Announcement Banner */}
       <div className="bg-black text-white p-2 text-center text-sm">
         <div className="container mx-auto flex items-center justify-center space-x-4">
@@ -44,15 +43,16 @@ const Index = () => {
         </div>
       </div>
       
-      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      <div className="bg-gradient-to-br from-background via-muted/20 to-background">
         {/* Navigation */}
         <nav className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center space-x-3">
-              <img src="/myblueprint_dark.png" alt="MyBlueprint Logo" className="h-8 w-auto" />
+              <img src="/myblueprint.png" alt="MyBlueprint Logo" className="h-8 w-auto block dark:hidden" />
+              <img src="/myblueprint_dark.png" alt="MyBlueprint Logo" className="h-8 w-auto hidden dark:block" />
             </Link>
             <div className="flex items-center space-x-4">
-              <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button asChild>
                 <Link to="/auth">Try Demo</Link>
               </Button>
             </div>
@@ -63,15 +63,16 @@ const Index = () => {
         <div className="container mx-auto px-4 py-20">
           <div className="text-center max-w-4xl mx-auto mb-16">
             <div className="flex justify-center mb-4">
-              <img src="/myblueprint_dark.png" alt="MyBlueprint Logo" className="h-24 w-auto" />
+              <img src="/myblueprint.png" alt="MyBlueprint Logo" className="h-24 w-auto block dark:hidden" />
+              <img src="/myblueprint_dark.png" alt="MyBlueprint Logo" className="h-24 w-auto hidden dark:block" />
             </div>
-            <h1 className="text-5xl font-semibold text-white mb-8 font-sf-pro">
+            <h1 className="text-5xl font-semibold text-foreground mb-8 font-sf-pro">
               Centralize Your College Application Workflow Today.
             </h1>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 size="lg"
-                className="text-lg px-8 py-6 bg-blue-600 hover:bg-blue-700 text-white shadow-[0_4px_0_0_rgba(0,0,0,0.25)] active:translate-y-0.5 active:shadow-none transition-all"
+                className="text-lg px-8 py-6 shadow-[0_4px_0_0_rgba(0,0,0,0.25)] active:translate-y-0.5 active:shadow-none transition-all"
                 asChild
               >
                 <Link to="/auth">
@@ -87,15 +88,15 @@ const Index = () => {
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-gray-800 border-gray-700">
+                <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
                   <CardHeader className="text-center pb-4">
-                    <div className="mx-auto p-3 bg-blue-600/20 rounded-full w-fit mb-4">
-                      <Icon className="h-8 w-8 text-blue-400" />
+                    <div className="mx-auto p-3 bg-primary/10 rounded-full w-fit mb-4">
+                      <Icon className="h-8 w-8 text-primary" />
                     </div>
-                    <CardTitle className="text-lg text-white">{feature.title}</CardTitle>
+                    <CardTitle className="text-lg">{feature.title}</CardTitle>
                   </CardHeader>
                   <CardContent className="text-center">
-                    <p className="text-gray-300 text-sm">{feature.description}</p>
+                    <p className="text-muted-foreground text-sm">{feature.description}</p>
                   </CardContent>
                 </Card>
               );
@@ -104,13 +105,13 @@ const Index = () => {
 
           {/* CTA Section */}
           <div className="text-center max-w-2xl mx-auto">
-            <div className="bg-gray-800/50 rounded-2xl p-8 border border-gray-700">
-              <h2 className="text-2xl font-bold mb-4 text-white">Ready to Get Started?</h2>
-              <p className="text-gray-300 mb-6">
+            <div className="bg-primary/5 rounded-2xl p-8 border">
+              <h2 className="text-2xl font-bold mb-4">Ready to Get Started?</h2>
+              <p className="text-muted-foreground mb-6">
                 Join thousands of students who are already using this platform to
                 organize their college applications and achieve their dreams.
               </p>
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white" asChild>
+              <Button size="lg" asChild>
                 <Link to="/auth">Create Your Account</Link>
               </Button>
             </div>
