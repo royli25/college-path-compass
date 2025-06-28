@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 // Conditionally import componentTagger only in development
-let componentTagger;
+let componentTagger: any = null;
 try {
   if (process.env.NODE_ENV === 'development') {
     componentTagger = require("lovable-tagger")?.componentTagger;
