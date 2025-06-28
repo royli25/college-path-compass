@@ -118,53 +118,12 @@ export function AppSidebar() {
           <SidebarMenu className="space-y-1">
             {navigationItems.map((item, idx) => {
               const isActive = location.pathname.startsWith(item.url);
-              if (item.title === "Profile") {
-                return (
-                  <>
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isActive}
-                        className="h-9 px-3 justify-start"
-                      >
-                        <Link to={item.url} className="flex items-center space-x-3">
-                          <item.icon className="h-4 w-4" />
-                          <span className="text-sm font-medium">{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem key="FinancialDropdown">
-                      <Collapsible>
-                        <CollapsibleTrigger className="w-full flex items-center px-3 py-2 rounded hover:bg-muted transition-colors">
-                          <BarChart3 className="h-4 w-4 mr-2" />
-                          <span className="text-sm font-medium flex-1 text-left">Financial</span>
-                          <ChevronDown className="h-4 w-4 ml-auto" />
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <SidebarMenu className="pl-3 space-y-0.5">
-                            <SidebarMenuItem>
-                              <SidebarMenuButton asChild isActive={location.pathname.startsWith('/financial/scholarships')} className="h-8 px-2 justify-start">
-                                <Link to="/financial/scholarships" className="text-sm">Scholarships</Link>
-                              </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                              <SidebarMenuButton asChild isActive={location.pathname.startsWith('/financial/aid-calculator')} className="h-8 px-2 justify-start">
-                                <Link to="/financial/aid-calculator" className="text-sm">Aid Calculator</Link>
-                              </SidebarMenuButton>
-                            </SidebarMenuItem>
-                          </SidebarMenu>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    </SidebarMenuItem>
-                  </>
-                );
-              }
               return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive}
-                    className="h-9 px-3 justify-start"
+                    className={`h-9 px-3 justify-start ${isActive ? '!bg-gray-200 !text-gray-900 !font-medium !hover:bg-gray-200 !hover:text-gray-900 dark:!bg-gray-700 dark:!text-gray-100 dark:!hover:bg-gray-700 dark:!hover:text-gray-100' : ''}`}
                   >
                     <Link to={item.url} className="flex items-center space-x-3">
                       <item.icon className="h-4 w-4" />
