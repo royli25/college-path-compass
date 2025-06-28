@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Circle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, Circle, ArrowLeft } from "lucide-react";
 import { useProfileData, getStepCompletion } from "@/hooks/useProfileData";
 import AcademicForm from "@/components/profile/AcademicForm";
 import ActivitiesForm from "@/components/profile/ActivitiesForm";
@@ -21,11 +22,11 @@ const ProfileEdit = () => {
   ];
 
   const handleComplete = () => {
-    navigate('/profile');
+    navigate('/dashboard');
   };
 
   const handleBack = () => {
-    navigate('/profile');
+    navigate('/dashboard');
   };
 
   const completedSteps = steps.filter((step) => getStepCompletion(profile, step.stepIndex)).length;
@@ -34,14 +35,22 @@ const ProfileEdit = () => {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-3xl font-medium text-foreground tracking-tight">
-            Profile Builder
-          </h1>
-          <p className="text-base text-muted-foreground">
-            Complete all sections to build your comprehensive application profile
-          </p>
+        {/* Header with Back Button */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-4">
+              <Button variant="outline" onClick={handleBack} size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Button>
+            </div>
+            <h1 className="text-3xl font-medium text-foreground tracking-tight">
+              Profile Builder
+            </h1>
+            <p className="text-base text-muted-foreground">
+              Complete all sections to build your comprehensive application profile
+            </p>
+          </div>
         </div>
 
         {/* Progress Overview */}
