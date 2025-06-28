@@ -1,7 +1,7 @@
 
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Skeleton } from '@/components/ui/skeleton';
+import LoadingScreen from './LoadingScreen';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -16,24 +16,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   advisorOnly = false,
   studentOnly = false
 }) => {
-  const { user, userRole, loading } = useAuth();
+  const { user, userRole, loading, error } = useAuth();
+
+  console.log('ProtectedRoute - loading:', loading, 'user:', !!user, 'role:', userRole, 'error:', error);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background p-8">
-        <div className="max-w-6xl mx-auto space-y-8">
-          <div className="space-y-2">
-            <Skeleton className="h-10 w-64" />
-            <Skeleton className="h-6 w-96" />
-          </div>
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-32 w-full" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
+  }
+
+  if (error) {
+    console.error('Auth error in ProtectedRoute:', error);
+    // Still allow navigation to auth page even with errors
+    return <Navigate to="/auth" replace />;
   }
 
   if (!user) {
