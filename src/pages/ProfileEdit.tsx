@@ -1,73 +1,46 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Circle } from "lucide-react";
 import { useProfileData, getStepCompletion } from "@/hooks/useProfileData";
-import BackgroundForm from "@/components/profile/BackgroundForm";
 import AcademicForm from "@/components/profile/AcademicForm";
 import ActivitiesForm from "@/components/profile/ActivitiesForm";
 import AwardsForm from "@/components/profile/AwardsForm";
 
 const ProfileEdit = () => {
-  const { step } = useParams();
   const navigate = useNavigate();
   const { data: profile } = useProfileData();
-  const [currentStep, setCurrentStep] = useState(0);
 
   const steps = [
-    { title: "Background Information", component: BackgroundForm },
-    { title: "Academic Profile", component: AcademicForm },
-    { title: "Activities & Leadership", component: ActivitiesForm },
-    { title: "Honors & Awards", component: AwardsForm }
+    { title: "Academic Profile", component: AcademicForm, stepIndex: 1 },
+    { title: "Activities & Leadership", component: ActivitiesForm, stepIndex: 2 },
+    { title: "Honors & Awards", component: AwardsForm, stepIndex: 3 }
   ];
 
-  useEffect(() => {
-    if (step) {
-      const stepNum = parseInt(step);
-      if (stepNum >= 0 && stepNum < steps.length) {
-        setCurrentStep(stepNum);
-      }
-    }
-  }, [step]);
-
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      const nextStep = currentStep + 1;
-      setCurrentStep(nextStep);
-      navigate(`/profile/edit/${nextStep}`);
-    } else {
-      // Profile completed
-      navigate('/profile');
-    }
+  const handleComplete = () => {
+    navigate('/profile');
   };
 
   const handleBack = () => {
-    if (currentStep > 0) {
-      const prevStep = currentStep - 1;
-      setCurrentStep(prevStep);
-      navigate(`/profile/edit/${prevStep}`);
-    } else {
-      navigate('/profile');
-    }
+    navigate('/profile');
   };
 
-  const completedSteps = steps.filter((_, index) => getStepCompletion(profile, index)).length;
+  const completedSteps = steps.filter((step) => getStepCompletion(profile, step.stepIndex)).length;
   const progressPercentage = (completedSteps / steps.length) * 100;
-
-  const CurrentStepComponent = steps[currentStep].component;
 
   return (
     <div className="min-h-screen bg-background p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">
           <h1 className="text-3xl font-medium text-foreground tracking-tight">
             Profile Builder
           </h1>
           <p className="text-base text-muted-foreground">
-            Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}
+            Complete all sections to build your comprehensive application profile
           </p>
         </div>
 
@@ -84,17 +57,14 @@ const ProfileEdit = () => {
               <Progress value={progressPercentage} className="h-3 rounded-full" />
               
               {/* Step indicators */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                 {steps.map((stepInfo, index) => {
-                  const isCompleted = getStepCompletion(profile, index);
-                  const isCurrent = index === currentStep;
+                  const isCompleted = getStepCompletion(profile, stepInfo.stepIndex);
                   
                   return (
                     <div
                       key={index}
-                      className={`flex items-center space-x-2 p-2 rounded-lg transition-colors ${
-                        isCurrent ? 'bg-primary/10 border border-primary/20' : ''
-                      }`}
+                      className="flex items-center space-x-2 p-2 rounded-lg"
                     >
                       {isCompleted ? (
                         <CheckCircle className="h-5 w-5 text-green-400" />
@@ -115,8 +85,12 @@ const ProfileEdit = () => {
           </CardContent>
         </Card>
 
-        {/* Current Step Form */}
-        <CurrentStepComponent onNext={handleNext} onBack={handleBack} />
+        {/* All Forms */}
+        <div className="space-y-12">
+          <AcademicForm onNext={() => {}} onBack={handleBack} />
+          <ActivitiesForm onNext={() => {}} onBack={() => {}} />
+          <AwardsForm onNext={handleComplete} onBack={() => {}} />
+        </div>
       </div>
     </div>
   );

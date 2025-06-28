@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -131,7 +132,7 @@ export const calculateProfileStrength = (profile: ProfileData | undefined): Prof
     };
   }
 
-  // Background Information (affects personality)
+  // Background Information (affects personality) - handled in settings now
   const backgroundFields = [
     profile.gender, profile.citizenship, profile.race_ethnicity,
     profile.first_generation, profile.income_bracket, profile.high_school, profile.class_rank
@@ -199,7 +200,7 @@ export const getStepCompletion = (profile: ProfileData | undefined, step: number
   if (!profile) return false;
 
   switch (step) {
-    case 0: // Background Information
+    case 0: // Background Information (now handled in settings)
       return !!(profile.gender && profile.citizenship && profile.race_ethnicity && 
                profile.first_generation !== null && profile.income_bracket && 
                profile.high_school && profile.class_rank);

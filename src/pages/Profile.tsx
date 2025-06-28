@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,12 +13,6 @@ const Profile = () => {
   const strength = calculateProfileStrength(profile);
 
   const onboardingSteps = [
-    {
-      title: "Background Information",
-      description: "Tell us about your personal and academic background",
-      fields: ["Gender", "Citizenship", "Race/Ethnicity", "First Generation", "Income Bracket", "High School", "Class Rank"],
-      stepIndex: 0
-    },
     {
       title: "Academic Profile", 
       description: "Share your GPA, test scores, and coursework",
@@ -46,7 +41,7 @@ const Profile = () => {
             <div className="h-8 bg-gray-200 rounded w-1/3"></div>
             <div className="h-4 bg-gray-200 rounded w-1/2"></div>
             <div className="space-y-4">
-              {[1, 2, 3, 4].map((i) => (
+              {[1, 2, 3].map((i) => (
                 <div key={i} className="h-32 bg-gray-200 rounded"></div>
               ))}
             </div>
@@ -67,7 +62,7 @@ const Profile = () => {
         <div className="space-y-2">
           <h1 className="text-3xl font-medium text-foreground tracking-tight">Profile Builder</h1>
           <p className="text-base text-muted-foreground">
-            Let's build your comprehensive application profile step by step
+            Complete your academic profile to build a strong application
           </p>
         </div>
 
@@ -124,7 +119,7 @@ const Profile = () => {
                         <p className="text-muted-foreground">{step.description}</p>
                       </div>
                     </div>
-                    <Link to={`/profile/edit/${step.stepIndex}`} className="flex-shrink-0 ml-4">
+                    <Link to={`/profile/edit`} className="flex-shrink-0 ml-4">
                       <Button
                         variant={isCurrent ? "default" : isCompleted ? "outline" : "ghost"}
                         className="rounded-xl"

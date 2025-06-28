@@ -4,22 +4,50 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Bell, Shield, User, Palette, LogOut } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Bell, Shield, User, Palette, LogOut, Save } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { useBeforeUnload } from "react-router-dom";
+import { useProfileData, useUpdateProfile } from "@/hooks/useProfileData";
+import { useToast } from "@/hooks/use-toast";
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
   const { signOut } = useAuth();
+  const { data: profile, isLoading } = useProfileData();
+  const updateProfile = useUpdateProfile();
+  const { toast } = useToast();
   
   const [currentTheme, setCurrentTheme] = useState(theme);
   const [isDirty, setIsDirty] = useState(false);
 
+  // Background Information State
+  const [backgroundData, setBackgroundData] = useState({
+    gender: "",
+    citizenship: "",
+    race_ethnicity: "",
+    first_generation: null as boolean | null,
+    income_bracket: ""
+  });
+
   useEffect(() => {
     setIsDirty(currentTheme !== theme);
   }, [currentTheme, theme]);
+
+  useEffect(() => {
+    if (profile) {
+      setBackgroundData({
+        gender: profile.gender || "",
+        citizenship: profile.citizenship || "",
+        race_ethnicity: profile.race_ethnicity || "",
+        first_generation: profile.first_generation,
+        income_bracket: profile.income_bracket || ""
+      });
+    }
+  }, [profile]);
 
   useBeforeUnload(
     (event) => {
@@ -41,6 +69,26 @@ const Settings = () => {
     }
   };
 
+  const handleSaveBackground = async () => {
+    try {
+      await updateProfile.mutateAsync(backgroundData);
+      toast({
+        title: "Background information saved",
+        description: "Your background information has been updated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error saving data",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const isBackgroundComplete = backgroundData.gender && backgroundData.citizenship && 
+                             backgroundData.race_ethnicity && backgroundData.first_generation !== null && 
+                             backgroundData.income_bracket;
+
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-8">
@@ -51,6 +99,111 @@ const Settings = () => {
       </div>
 
       <div className="space-y-6">
+        {/* Background Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Background Information
+            </CardTitle>
+            <CardDescription>
+              Your personal and demographic information
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Gender</Label>
+                <Select value={backgroundData.gender} onValueChange={(value) => setBackgroundData({...backgroundData, gender: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="non-binary">Non-binary</SelectItem>
+                    <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Citizenship</Label>
+                <Select value={backgroundData.citizenship} onValueChange={(value) => setBackgroundData({...backgroundData, citizenship: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select citizenship" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="us-citizen">U.S. Citizen</SelectItem>
+                    <SelectItem value="permanent-resident">Permanent Resident</SelectItem>
+                    <SelectItem value="international">International Student</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Race/Ethnicity</Label>
+              <Select value={backgroundData.race_ethnicity} onValueChange={(value) => setBackgroundData({...backgroundData, race_ethnicity: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select race/ethnicity" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="american-indian">American Indian or Alaska Native</SelectItem>
+                  <SelectItem value="asian">Asian</SelectItem>
+                  <SelectItem value="black">Black or African American</SelectItem>
+                  <SelectItem value="hispanic">Hispanic or Latino</SelectItem>
+                  <SelectItem value="pacific-islander">Native Hawaiian or Pacific Islander</SelectItem>
+                  <SelectItem value="white">White</SelectItem>
+                  <SelectItem value="two-or-more">Two or more races</SelectItem>
+                  <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Are you a first-generation college student?</Label>
+              <RadioGroup 
+                value={backgroundData.first_generation?.toString() || ""} 
+                onValueChange={(value) => setBackgroundData({...backgroundData, first_generation: value === "true"})}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="true" id="first-gen-yes" />
+                  <Label htmlFor="first-gen-yes">Yes</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="false" id="first-gen-no" />
+                  <Label htmlFor="first-gen-no">No</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Family Income Bracket</Label>
+              <Select value={backgroundData.income_bracket} onValueChange={(value) => setBackgroundData({...backgroundData, income_bracket: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select income bracket" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="under-30k">Under $30,000</SelectItem>
+                  <SelectItem value="30k-60k">$30,000 - $60,000</SelectItem>
+                  <SelectItem value="60k-100k">$60,000 - $100,000</SelectItem>
+                  <SelectItem value="100k-150k">$100,000 - $150,000</SelectItem>
+                  <SelectItem value="150k-250k">$150,000 - $250,000</SelectItem>
+                  <SelectItem value="over-250k">Over $250,000</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button onClick={handleSaveBackground} disabled={!isBackgroundComplete || updateProfile.isPending}>
+              <Save className="h-4 w-4 mr-2" />
+              Save Background Information
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Separator />
+
         {/* Profile Settings */}
         <Card>
           <CardHeader>
