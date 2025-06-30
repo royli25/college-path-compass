@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,11 +10,13 @@ import { GraduationCap, Mail, Lock, User, ArrowLeft, AlertCircle, Users } from "
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const { signIn, signUp, user, loading } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isSigningUp, setIsSigningUp] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   
@@ -60,6 +63,33 @@ const Auth = () => {
     }
     
     setIsSigningUp(false);
+  };
+
+  const handleForgotPassword = async () => {
+    if (!signInData.email) {
+      setError('Please enter your email address first');
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+    setIsResettingPassword(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(signInData.email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+
+      if (error) {
+        setError(error.message);
+      } else {
+        setSuccess('Password reset email sent! Please check your inbox.');
+      }
+    } catch (err: any) {
+      setError('Failed to send password reset email');
+    }
+
+    setIsResettingPassword(false);
   };
 
   return (
@@ -138,6 +168,17 @@ const Auth = () => {
                   <Button type="submit" className="w-full" disabled={isSigningIn}>
                     {isSigningIn ? "Signing in..." : "Sign In"}
                   </Button>
+                  <div className="text-center">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="text-sm text-muted-foreground hover:text-foreground"
+                      onClick={handleForgotPassword}
+                      disabled={isResettingPassword}
+                    >
+                      {isResettingPassword ? "Sending..." : "Forgot your password?"}
+                    </Button>
+                  </div>
                 </form>
               </TabsContent>
               
