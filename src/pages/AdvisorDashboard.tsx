@@ -27,6 +27,7 @@ const AdvisorDashboard = () => {
   const { data: requests = [], isLoading: requestsLoading } = useAdvisorRequests();
   const { data: tasks = [], isLoading: tasksLoading } = useAdvisorTasksQuery();
   const { data: searchResults = [], isLoading: searchLoading } = useSearchStudents(searchTerm);
+  console.log(searchResults);
 
   const handleCreateTask = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -233,7 +234,7 @@ const AdvisorDashboard = () => {
                         <CardTitle className="text-lg">{student.full_name}</CardTitle>
                         <CardDescription>
                           <div className="space-y-1">
-                            <p>Student ID: {student.student_id}</p>
+                            <p>Student ID: {student.id}</p>
                             <p>Email: {student.email}</p>
                           </div>
                         </CardDescription>

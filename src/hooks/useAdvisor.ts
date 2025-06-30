@@ -7,80 +7,36 @@ export const useAdvisor = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Search for students to add to courseload by student ID
   const useSearchStudents = (searchTerm: string) => {
     return useQuery({
       queryKey: ['search-students', searchTerm],
       queryFn: async () => {
         if (!searchTerm.trim()) return [];
 
-        console.log('=== STUDENT SEARCH DEBUG ===');
-        console.log('Search term (student ID):', searchTerm);
-        console.log('Current user ID:', user?.id);
-
-        // 1. First search for profiles that match the student ID
-        const { data: matchingProfiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, full_name, email, high_school, student_id')
-          .ilike('student_id', `%${searchTerm}%`)
-          .not('student_id', 'is', null); // Only include profiles with student_id set
-
-        if (profilesError) {
-          console.error('Error searching profiles:', profilesError);
-          throw profilesError;
-        }
-        
-        console.log('Raw matching profiles found:', matchingProfiles);
-        
-        // Filter out current user (advisor shouldn't find themselves)
-        const profilesExcludingCurrentUser = matchingProfiles?.filter(profile => profile.id !== user?.id) || [];
-        
-        if (profilesExcludingCurrentUser.length === 0) {
-          console.log('No profiles found after excluding current user');
-          return [];
-        }
-
-        // 2. Filter to only include users who have the 'student' role
-        const profileIds = profilesExcludingCurrentUser.map(p => p.id);
-        
+        // First get student role IDs
         const { data: studentRoles, error: rolesError } = await supabase
           .from('user_roles')
           .select('user_id')
-          .eq('role', 'student')
-          .in('user_id', profileIds);
-
-        if (rolesError) {
-          console.error('Error checking student roles:', rolesError);
-          throw rolesError;
-        }
-
-        const studentUserIds = studentRoles?.map(r => r.user_id) || [];
+          .eq('role', 'student');
         
-        const studentProfiles = profilesExcludingCurrentUser.filter(profile => 
-          studentUserIds.includes(profile.id)
-        );
 
-        if (studentProfiles.length === 0) {
-          console.log('No profiles found with student role');
-          return [];
-        }
+        if (rolesError) throw rolesError;
 
-        // 3. Filter out students already connected to this advisor
-        const { data: existingConnections } = await supabase
-          .from('advisor_students')
-          .select('student_id')
-          .eq('advisor_id', user?.id);
+        const studentIds = studentRoles.map(role => role.user_id);
 
-        const existingStudentIds = existingConnections?.map(c => c.student_id) || [];
+        // Then search profiles filtered by student IDs
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, full_name, email, high_school')
+          .ilike('email', `%${searchTerm}%`)
+          .in('id', studentIds)
+          .limit(10);
+
+        if (error) throw error;
+
+        const filteredData = data?.filter(profile => profile.id !== user?.id);
         
-        const availableStudents = studentProfiles.filter(student => 
-          !existingStudentIds.includes(student.id)
-        );
-
-        console.log('Final available students:', availableStudents);
-        console.log('=== END STUDENT SEARCH DEBUG ===');
-        
-        return availableStudents.slice(0, 10); // Limit to 10 results
+        return filteredData || [];
       },
       enabled: !!user && searchTerm.trim().length > 0,
     });
