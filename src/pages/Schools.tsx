@@ -1,30 +1,35 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, GraduationCap, DollarSign, Calendar, Plus, Trash2, Edit3, CalendarIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { MapPin, Users, DollarSign, Star, BookOpen, FileText, Trash2, Eye } from "lucide-react";
 import { useUserSchools } from "@/hooks/useSchools";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import AddSchoolFromCatalogDialog from "@/components/AddSchoolFromCatalogDialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { Link } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import AddSchoolFromCatalogDialog from "@/components/AddSchoolFromCatalogDialog";
-import { Link } from "react-router-dom";
-import SchoolDeadlineManager from "@/components/SchoolDeadlineManager";
-import { format } from "date-fns";
+import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { School } from "lucide-react";
 
 const Schools = () => {
-  const { data: schools = [], isLoading } = useUserSchools();
-  const [editingDeadlineFor, setEditingDeadlineFor] = useState<string | null>(null);
+  const { userRole } = useAuth();
   const queryClient = useQueryClient();
+  const { data: schools = [], isLoading, error } = useUserSchools();
 
-  const removeSchoolMutation = useMutation({
+  // Delete school mutation
+  const deleteSchoolMutation = useMutation({
     mutationFn: async (schoolId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { error } = await supabase
         .from('user_school_lists')
         .delete()
-        .eq('id', schoolId);
-      
+        .match({ user_id: user.id, id: schoolId });
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -36,19 +41,59 @@ const Schools = () => {
     }
   });
 
-  if (isLoading) {
+  // Fetch research status for all schools
+  const { data: researchData = [] } = useQuery({
+    queryKey: ['school-research-status'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('school_research')
+        .select('school_id, content')
+        .eq('user_id', user.id);
+
+      if (error) return [];
+      return data || [];
+    },
+    enabled: !!userRole && userRole === 'student'
+  });
+
+  // Create a map of school IDs to research content
+  const researchMap = researchData.reduce((acc, research) => {
+    acc[research.school_id] = research.content;
+    return acc;
+  }, {} as Record<string, string>);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Submitted":
+        return "bg-green-500/20 text-green-400 border-green-500/30";
+      case "In Progress":
+        return "bg-primary/20 text-primary border-primary/30";
+      case "Not Started":
+        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+      default:
+        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+    }
+  };
+
+  const handleDeleteSchool = (schoolId: string, schoolName: string) => {
+    if (confirm(`Are you sure you want to remove ${schoolName} from your school list? This will also remove any associated essays and research documents.`)) {
+      deleteSchoolMutation.mutate(schoolId);
+    }
+  };
+
+  if (error) {
     return (
       <div className="min-h-screen bg-background p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse space-y-8">
-            <div className="h-10 bg-gray-200 rounded w-1/3"></div>
-            <div className="h-6 bg-gray-200 rounded w-1/2"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="h-64 bg-gray-200 rounded"></div>
-              ))}
-            </div>
-          </div>
+        <div className="max-w-6xl mx-auto">
+          <Card className="ultra-card text-center py-12">
+            <CardContent>
+              <p className="text-base text-destructive mb-4">Error loading schools</p>
+              <p className="text-sm text-muted-foreground">{error.message}</p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -56,124 +101,134 @@ const Schools = () => {
 
   return (
     <div className="min-h-screen bg-background p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <h1 className="text-3xl font-medium text-foreground tracking-tight">My School List</h1>
+            <h1 className="text-3xl font-medium text-foreground tracking-tight">
+              {userRole === 'admin' ? 'All School Lists' : 'My School List'}
+            </h1>
             <p className="text-base text-muted-foreground">
-              Track your target schools and application progress.
+              {userRole === 'admin' ? 'Manage all student school lists' : 'Research and organize your target colleges'}
             </p>
           </div>
-          <div className="flex gap-2">
-            <AddSchoolFromCatalogDialog />
-            <Link to="/school-research">
-              <Button variant="outline">
-                <Edit3 className="mr-2 h-4 w-4" />
-                Research Notes
-              </Button>
-            </Link>
-          </div>
+          {userRole === 'student' && <AddSchoolFromCatalogDialog />}
         </div>
 
-        {/* Schools Grid */}
-        {schools.length === 0 ? (
-          <Card className="ultra-card text-center py-12">
-            <CardContent>
-              <GraduationCap className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">No Schools Added Yet</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Start building your school list to track your applications.
-              </p>
-              <AddSchoolFromCatalogDialog />
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {schools.map((school) => (
-              <Card key={school.id} className="ultra-card hover:shadow-md transition-shadow">
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg font-semibold text-foreground">
-                        {school.name}
-                      </CardTitle>
-                      {school.location && (
-                        <div className="flex items-center text-muted-foreground mt-1">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          <span className="text-sm">{school.location}</span>
-                        </div>
-                      )}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeSchoolMutation.mutate(school.id)}
-                      className="text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="space-y-4">
-                  {/* School Info */}
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    {school.type && (
-                      <div>
-                        <span className="font-medium text-muted-foreground">Type:</span>
-                        <p className="text-foreground">{school.type}</p>
+        {/* Loading State */}
+        {isLoading && (
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => (
+              <Card key={i} className="ultra-card">
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-4">
+                    <Skeleton className="h-12 w-12 rounded" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-6 w-1/3" />
+                      <Skeleton className="h-4 w-1/2" />
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-20" />
                       </div>
-                    )}
-                    {school.acceptance_rate && (
-                      <div>
-                        <span className="font-medium text-muted-foreground">Acceptance:</span>
-                        <p className="text-foreground">{school.acceptance_rate}</p>
-                      </div>
-                    )}
-                    {school.ranking && (
-                      <div>
-                        <span className="font-medium text-muted-foreground">Ranking:</span>
-                        <p className="text-foreground">{school.ranking}</p>
-                      </div>
-                    )}
-                    {school.tuition && (
-                      <div>
-                        <span className="font-medium text-muted-foreground">Tuition:</span>
-                        <p className="text-foreground">{school.tuition}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Major */}
-                  {school.major && (
-                    <div className="pt-2">
-                      <span className="font-medium text-muted-foreground text-sm">Intended Major:</span>
-                      <p className="text-sm text-foreground">{school.major}</p>
-                    </div>
-                  )}
-
-                  {/* Application Status */}
-                  <div className="flex items-center justify-between pt-2">
-                    <div>
-                      <span className="font-medium text-muted-foreground text-sm">Status:</span>
-                      <Badge variant={school.status === 'Submitted' ? 'default' : 'secondary'} className="ml-2">
-                        {school.status}
-                      </Badge>
                     </div>
                   </div>
-
-                  {/* Deadline Management */}
-                  <SchoolDeadlineManager
-                    school={school}
-                    isEditing={editingDeadlineFor === school.id}
-                    onStartEdit={() => setEditingDeadlineFor(school.id)}
-                    onCancelEdit={() => setEditingDeadlineFor(null)}
-                  />
                 </CardContent>
               </Card>
             ))}
           </div>
+        )}
+
+        {/* School List - no type grouping or badge */}
+        {!isLoading && schools.length > 0 && (
+          <div className="space-y-4">
+            {schools.map(school => {
+              const hasResearch = researchMap[school.id] && researchMap[school.id].trim().length > 0;
+              
+              return (
+                <Card key={school.id} className="ultra-card smooth-hover">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between gap-6">
+                      {/* Left: School Info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-medium text-foreground mb-1 truncate">{school.name}</h3>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                          {school.location && (
+                            <div className="flex items-center space-x-1">
+                              <MapPin className="h-3 w-3" />
+                              <span>{school.location}</span>
+                            </div>
+                          )}
+                          {school.ranking && (
+                            <div className="flex items-center space-x-1">
+                              <Star className="h-3 w-3" />
+                              <span>{school.ranking}</span>
+                            </div>
+                          )}
+                          {userRole === 'student' && (
+                            <div className="flex items-center space-x-1">
+                              <FileText className="h-3 w-3" />
+                              <span>{hasResearch ? 'Research Available' : 'No Research'}</span>
+                            </div>
+                          )}
+                          {school.acceptance_rate && (
+                            <div className="flex items-center space-x-1">
+                              <Users className="h-3 w-3" />
+                              <span>Accept Rate: <span className="font-medium text-foreground">{school.acceptance_rate}</span></span>
+                            </div>
+                          )}
+                          {school.tuition && (
+                            <div className="flex items-center space-x-1">
+                              <DollarSign className="h-3 w-3" />
+                              <span>Tuition: <span className="font-medium text-foreground">{school.tuition}</span></span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Right: Action Icons */}
+                      <div className="flex items-center gap-3 ml-4">
+                        <Button variant="ghost" size="icon" className="hover:bg-muted" title="View Details">
+                          <Eye className="h-5 w-5" />
+                        </Button>
+                        <Link to={`/schools/${school.id}/research`}>
+                          <Button variant="ghost" size="icon" className="hover:bg-muted" title="Research Document">
+                            <FileText className="h-5 w-5" />
+                          </Button>
+                        </Link>
+                        {userRole === 'student' && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="hover:bg-destructive/10 text-destructive"
+                            onClick={() => handleDeleteSchool(school.id, school.name)}
+                            disabled={deleteSchoolMutation.isPending}
+                            title="Remove"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {!isLoading && schools.length === 0 && (
+          <Card className="ultra-card">
+            <CardContent className="text-center py-12">
+              <School className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium text-foreground">No schools in your list yet</h3>
+              <p className="text-muted-foreground mt-2 mb-6">
+                Add schools from our catalog to start tracking your applications.
+              </p>
+              <AddSchoolFromCatalogDialog />
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>

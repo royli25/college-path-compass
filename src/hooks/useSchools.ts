@@ -21,7 +21,6 @@ export interface UserSchoolList {
   type: string | null;
   application_type: string | null;
   deadline: string | null;
-  application_deadline: string | null;
   status: string | null;
   acceptance_rate: string | null;
   tuition: string | null;

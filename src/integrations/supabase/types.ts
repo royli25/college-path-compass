@@ -320,6 +320,7 @@ export type Database = {
         Row: {
           content: string | null
           created_at: string | null
+          deadline: string | null
           id: string
           prompt_name: string
           school_id: string | null
@@ -332,6 +333,7 @@ export type Database = {
         Insert: {
           content?: string | null
           created_at?: string | null
+          deadline?: string | null
           id?: string
           prompt_name: string
           school_id?: string | null
@@ -344,6 +346,7 @@ export type Database = {
         Update: {
           content?: string | null
           created_at?: string | null
+          deadline?: string | null
           id?: string
           prompt_name?: string
           school_id?: string | null
@@ -569,7 +572,6 @@ export type Database = {
       user_school_lists: {
         Row: {
           acceptance_rate: string | null
-          application_deadline: string | null
           application_type: string | null
           created_at: string | null
           deadline: string | null
@@ -587,7 +589,6 @@ export type Database = {
         }
         Insert: {
           acceptance_rate?: string | null
-          application_deadline?: string | null
           application_type?: string | null
           created_at?: string | null
           deadline?: string | null
@@ -605,7 +606,6 @@ export type Database = {
         }
         Update: {
           acceptance_rate?: string | null
-          application_deadline?: string | null
           application_type?: string | null
           created_at?: string | null
           deadline?: string | null

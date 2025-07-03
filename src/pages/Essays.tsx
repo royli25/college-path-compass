@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,6 +32,7 @@ interface Essay {
   prompt_name: string;
   content: string | null;
   word_limit: number | null;
+  deadline: string | null;
   status: string | null;
   created_at: string | null;
   updated_at: string | null;
@@ -62,7 +62,8 @@ const Essays = () => {
   const [isAiCollapsed, setIsAiCollapsed] = useState(false);
   const [newEssay, setNewEssay] = useState({
     prompt_name: '',
-    word_limit: ''
+    word_limit: '',
+    deadline: ''
   });
 
   // Fetch essays
@@ -106,6 +107,7 @@ const Essays = () => {
         .insert({
           ...essay,
           word_limit: essay.word_limit ? parseInt(essay.word_limit) : null,
+          deadline: essay.deadline || null,
           user_id: user.id,
           status: 'drafting',
           content: ''
@@ -119,7 +121,7 @@ const Essays = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['essays'] });
       setShowAddFormForSchool(null);
-      setNewEssay({ prompt_name: '', word_limit: '' });
+      setNewEssay({ prompt_name: '', word_limit: '', deadline: '' });
       toast.success('Essay added successfully!');
       setEditingEssay(data); // Open new essay in editor
     },
@@ -266,9 +268,6 @@ const Essays = () => {
     const wordLimit = editingEssay.word_limit || 0;
     const progress = wordLimit > 0 ? (wordCount / wordLimit) * 100 : 0;
     
-    // Find the school for this essay to get the deadline
-    const school = userSchools.find(s => s.name === editingEssay.school_name);
-    
     return (
       <div className="min-h-screen bg-background">
         <div className="p-8 max-w-7xl mx-auto">
@@ -306,8 +305,8 @@ const Essays = () => {
               <CardTitle className="text-xl">{editingEssay.school_name}</CardTitle>
               <p className="text-muted-foreground">{editingEssay.prompt_name}</p>
               <div className="flex items-center space-x-4 text-sm text-muted-foreground pt-2">
-                {school?.application_deadline && (
-                  <div className="flex items-center"><CalendarIcon className="mr-2 h-4 w-4" /> {format(new Date(school.application_deadline), "PPP")}</div>
+                {editingEssay.deadline && (
+                  <div className="flex items-center"><CalendarIcon className="mr-2 h-4 w-4" /> {format(new Date(editingEssay.deadline), "PPP")}</div>
                 )}
                 {wordLimit > 0 && (
                   <div className="flex items-center"><BookOpen className="mr-2 h-4 w-4" /> {wordLimit} words</div>
@@ -369,6 +368,9 @@ const Essays = () => {
               <h1 className="text-3xl font-medium text-foreground tracking-tight">Essay Management</h1>
               <p className="text-base text-muted-foreground">Track and organize your application essays.</p>
             </div>
+            <div>
+              {/* Optional: Add a global "Add Essay" button here if needed */}
+            </div>
           </div>
 
           {/* School List and Essays */}
@@ -395,16 +397,8 @@ const Essays = () => {
                   <AccordionItem value={school.id} key={school.id} className="border rounded-lg ultra-card overflow-hidden bg-background">
                     <AccordionTrigger className="flex w-full items-center justify-between p-4 hover:no-underline hover:bg-muted/50 transition-colors [&[data-state=open]>div>button]:bg-secondary">
                       <div className="flex items-center gap-4">
-                        <div className="flex flex-col items-start">
-                          <h3 className="text-lg font-medium text-foreground">{school.name}</h3>
-                          {school.application_deadline && (
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <CalendarIcon className="mr-1.5 h-3 w-3" />
-                              Due: {format(new Date(school.application_deadline), "MMM d, yyyy")}
-                            </div>
-                          )}
-                        </div>
-                        <Badge variant={hasEssays ? "default" : "secondary"} className="h-6 ml-2">
+                        <h3 className="text-lg font-medium text-foreground">{school.name}</h3>
+                        <Badge variant={hasEssays ? "default" : "secondary"} className="h-6">
                           {essayCount} {essayCount === 1 ? 'Essay' : 'Essays'}
                         </Badge>
                       </div>
@@ -427,6 +421,7 @@ const Essays = () => {
                                   <div className="flex-1">
                                     <p className="font-medium">{essay.prompt_name}</p>
                                     <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-1">
+                                      {essay.deadline && <span className="flex items-center"><CalendarIcon className="mr-1.5 h-3 w-3"/>{format(new Date(essay.deadline), "MMM d")}</span>}
                                       <span>{wordCount} / {wordLimit} words</span>
                                     </div>
                                   </div>
@@ -462,15 +457,26 @@ const Essays = () => {
                                 onChange={e => setNewEssay({ ...newEssay, prompt_name: e.target.value })}
                               />
                             </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="word_limit">Word Limit</Label>
-                              <Input
-                                id="word_limit"
-                                type="number"
-                                placeholder="e.g., 650"
-                                value={newEssay.word_limit}
-                                onChange={e => setNewEssay({ ...newEssay, word_limit: e.target.value })}
-                              />
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="word_limit">Word Limit</Label>
+                                <Input
+                                  id="word_limit"
+                                  type="number"
+                                  placeholder="e.g., 650"
+                                  value={newEssay.word_limit}
+                                  onChange={e => setNewEssay({ ...newEssay, word_limit: e.target.value })}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="deadline">Deadline (Optional)</Label>
+                                <Input
+                                  id="deadline"
+                                  type="date"
+                                  value={newEssay.deadline}
+                                  onChange={e => setNewEssay({ ...newEssay, deadline: e.target.value })}
+                                />
+                              </div>
                             </div>
                             <div className="flex justify-end space-x-2">
                               <Button variant="ghost" onClick={() => setShowAddFormForSchool(null)}>Cancel</Button>
