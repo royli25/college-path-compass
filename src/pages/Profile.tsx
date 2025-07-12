@@ -15,7 +15,7 @@ const Profile = () => {
 
   // Redirect to profile edit page immediately
   useEffect(() => {
-    navigate('/profile/edit');
+    navigate('/profile/edit/0');
   }, [navigate]);
 
   if (isLoading) {
